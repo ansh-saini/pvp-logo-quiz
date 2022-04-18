@@ -1,11 +1,14 @@
+import { appwrite } from "global/appwrite";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
-import { appwrite, Collections } from "global/appwrite";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 import styles from "styles/Home.module.css";
-import { postData } from "utils/api";
-import { Query } from "appwrite";
+import { API, postData } from "utils/api";
+
 const Home: NextPage = () => {
+  const router = useRouter();
   // const createUser = () => {
   //   appwrite.account
   //     .create("unique()", "me@example.com", "password", "Jane Doe")
@@ -27,6 +30,26 @@ const Home: NextPage = () => {
     });
   };
 
+  const logout = async () => {
+    const res = await API.account.deleteSession("current");
+    if (res.isOK) {
+      router.replace("/auth");
+      // Navigate to login
+    }
+  };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const res = await API.account.get();
+      if (!res.isOK) {
+        router.replace("/auth");
+        // Navigate to login
+      }
+    };
+
+    if (router.isReady) checkAuth();
+  }, [router]);
+
   const getRoom = async () => {
     const account = await appwrite.account.get();
     console.log(account);
@@ -45,6 +68,7 @@ const Home: NextPage = () => {
       </Head>
 
       <button onClick={getRoom}>Click me to get your room</button>
+      <button onClick={logout}>Click me to logout</button>
       {/* <button onClick={createUser}>Click me to create user</button> */}
       {/* TODO */}
       {/* <p>Players online: </p> */}

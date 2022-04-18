@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { appwrite } from "global/appwrite";
 import type { NextPage } from "next";
 import Head from "next/head";
-import { appwrite } from "global/appwrite";
+import { useRouter } from "next/router";
+import { useState } from "react";
 import styles from "styles/auth.module.css";
 
-const Home: NextPage = () => {
+const Auth: NextPage = () => {
+  const router = useRouter();
+
   const [formState, setFormState] = useState({
     email: "",
     password: "",
@@ -26,6 +29,7 @@ const Home: NextPage = () => {
 
     promise.then(
       function (response) {
+        router.push("/");
         console.log(response); // Success
       },
       function (error) {
@@ -91,7 +95,7 @@ const Home: NextPage = () => {
             required
           />
         </div>
-        <div className="form-group">
+        {/* <div className="form-group">
           <label className="form-remember">
             <input type="checkbox" />
             Remember Me
@@ -99,7 +103,7 @@ const Home: NextPage = () => {
           <a className="form-recovery" href="#">
             Forgot Password?
           </a>
-        </div>
+        </div> */}
         <div className="form-group">
           <button type="submit">Log In</button>
         </div>
@@ -108,4 +112,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+export default Auth;
