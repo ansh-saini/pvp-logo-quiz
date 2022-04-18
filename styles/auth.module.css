@@ -1,0 +1,15 @@
+.container {
+    height: 100%;
+    display: grid;
+    place-items: center;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
