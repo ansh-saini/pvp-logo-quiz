@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "appwrite": "^7.0.0",
+    "nanoid": "^3.3.3",
     "next": "12.1.5",
     "node-appwrite": "^5.1.0",
     "react": "18.0.0",

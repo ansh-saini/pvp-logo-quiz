@@ -1,7 +1,9 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from "next";
 import { Collections } from "global/appwrite";
+import { nanoid } from "nanoid";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { database } from "server/appwrite";
+import { Logo, Room } from "utils/models";
 
 type Data = any;
 
@@ -9,30 +11,52 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  console.log(req.body);
-
   const userId = req.body.owner;
-  database.createDocument(
-    Collections.Room,
-    "unique()",
-    {
-      code: "3",
-      owner: userId,
-      gameState: JSON.stringify({}),
-      players: [userId],
-    },
-    [`user:${userId}`]
-  );
-  const promise = getInitialGameState();
-  promise
-    .then((response) => {
-      res.status(200).json(response);
-    })
-    .catch((err) => {
-      res.status(400).json(err);
+  database
+    .createDocument<Room>(
+      Collections.Room,
+      "unique()",
+      {
+        code: nanoid(10),
+        owner: userId,
+        gameState: JSON.stringify({}),
+        players: [userId],
+      },
+      [`user:${userId}`]
+    )
+    .then((room) => {
+      getInitialGameState(room.$id)
+        .then(() => {
+          res.status(200).json({ code: room.code });
+        })
+        .catch(console.error);
+
+      // console.log({ room });
+      // promise
+      //   .then((response) => {
+      //     res.status(200).json(response);
+      //   })
+      //   .catch((err) => {
+      //     res.status(400).json(err);
+      //   });
     });
 }
 
-const getInitialGameState = () => {
-  return database.listDocuments(Collections.Logo);
+const getInitialGameState = (roomId: string) => {
+  return database
+    .listDocuments<Logo>(Collections.Logo, [], 10, 0)
+    .then((questions) => {
+      database.updateDocument(Collections.Room, roomId, {
+        gameState: JSON.stringify(
+          questions.documents.map((q) => ({
+            [q.$id]: {
+              // Add options
+              image: q.image,
+              response: {},
+            },
+          }))
+        ),
+      });
+    })
+    .catch(console.error);
 };

@@ -25,16 +25,21 @@ const Home: NextPage = () => {
   const createRoom = async () => {
     const account = await appwrite.account.get();
 
-    await postData("/api/createRoom/", {
-      owner: account.$id,
-    });
+    try {
+      const res = await postData("/api/createRoom/", {
+        owner: account.$id,
+      });
+      console.log(res);
+      router.push(`/room/${res.code}`);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const logout = async () => {
     const res = await API.account.deleteSession("current");
     if (res.isOK) {
       router.replace("/auth");
-      // Navigate to login
     }
   };
 
