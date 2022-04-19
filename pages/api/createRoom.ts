@@ -2,6 +2,7 @@
 import { Collections } from "global/appwrite";
 import { nanoid } from "nanoid";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { Models } from "node-appwrite";
 import { database } from "server/appwrite";
 import { Logo, Room } from "utils/models";
 
@@ -47,16 +48,21 @@ const getInitialGameState = (roomId: string) => {
     .listDocuments<Logo>(Collections.Logo, [], 10, 0)
     .then((questions) => {
       database.updateDocument(Collections.Room, roomId, {
-        gameState: JSON.stringify(
-          questions.documents.map((q) => ({
-            [q.$id]: {
-              // Add options
-              image: q.image,
-              response: {},
-            },
-          }))
-        ),
+        gameState: JSON.stringify(formatQuestions(questions)),
       });
     })
     .catch(console.error);
+};
+
+const formatQuestions = (questions: Models.DocumentList<Logo>) => {
+  const obj: Record<string, any> = {};
+
+  questions.documents.forEach((q) => {
+    obj[q.$id] = {
+      // Add options
+      image: q.image,
+      response: {},
+    };
+  });
+  return obj;
 };
