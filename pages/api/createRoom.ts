@@ -43,15 +43,55 @@ export default async function handler(
     });
 }
 
-const getInitialGameState = (roomId: string) => {
-  return database
-    .listDocuments<Logo>(Collections.Logo, [], 10, 0)
-    .then((questions) => {
-      database.updateDocument(Collections.Room, roomId, {
-        gameState: JSON.stringify(formatQuestions(questions)),
-      });
-    })
-    .catch(console.error);
+/**
+ * TODO: Options generate file system se bhi kar skte hain.
+ * Can do this for questions as well. Random file names utha ke Query me pass kar dunga. Ek sath 10 question aa jayenge.
+ * Will shuffle them using JS then.
+ * HMM
+ * console.time laga ke dekhunga which one is faster
+ * ORRR
+ * I can just list all logos DB se. 2-3K entries aa jayengi kitna he time lagega. Instead of this randomizer shit which hits the DB like 50 times (if you include options)
+ *
+ * @param roomId
+ * @returns
+ */
+const getInitialGameState = async (roomId: string) => {
+  // Get total entries
+  let count = 0;
+  const NUMBER_OF_QUESTIONS = 10;
+  const questions: Models.DocumentList<Logo> = {
+    total: 10,
+    documents: [],
+  };
+  const generatedInts: number[] = [];
+
+  while (questions.documents.length < NUMBER_OF_QUESTIONS) {
+    count += 1;
+    const randomInt = getRandomInt(0, questions.total);
+
+    console.log(`Fetching entry number ${randomInt}`);
+    const { total, documents } = await database.listDocuments<Logo>(
+      Collections.Logo,
+      [],
+      1,
+      randomInt
+    );
+    if (generatedInts.includes(randomInt)) {
+      continue;
+    }
+
+    questions.documents.push(documents[0]);
+    questions.total = total;
+    generatedInts.push(randomInt);
+    console.log(total, documents.length, questions.documents.length);
+  }
+
+  console.log(`Loop ran ${count} times`);
+
+  console.log(`Returning with ${questions.documents.length} questions`);
+  return database.updateDocument(Collections.Room, roomId, {
+    gameState: JSON.stringify(formatQuestions(questions)),
+  });
 };
 
 const formatQuestions = (questions: Models.DocumentList<Logo>) => {
@@ -66,3 +106,11 @@ const formatQuestions = (questions: Models.DocumentList<Logo>) => {
   });
   return obj;
 };
+
+function getRandomInt(min: number, max: number) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+
+  // The maximum is exclusive and the minimum is inclusive
+  return Math.floor(Math.random() * (max - min) + min);
+}
