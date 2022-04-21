@@ -1,6 +1,7 @@
 import { Models } from "node-appwrite";
 
 export interface Logo extends Models.Document {
+  name: string;
   image: string;
 }
 
@@ -17,6 +18,9 @@ export type ParsedRoom = Omit<Room, "gameState"> & {
     [key: string]: {
       image: string;
       response: any;
+      options: string[];
     };
   };
 };
+
+export type Question = Logo & { options: string[] };

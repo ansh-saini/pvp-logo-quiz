@@ -57,6 +57,11 @@ const Room = (props: Props) => {
         {questions.map(([questionId, question]) => (
           <div key={questionId}>
             <img src={question.image} alt="" width="80px" height={80} />
+            <div>
+              {question.options.map((option) => (
+                <p key={option}>{option}</p>
+              ))}
+            </div>
           </div>
         ))}
       </div>
