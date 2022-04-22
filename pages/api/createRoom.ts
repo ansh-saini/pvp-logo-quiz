@@ -23,6 +23,7 @@ export default async function handler(
         gameState: JSON.stringify({}),
         players: [userId],
       },
+      [`user:${userId}`],
       [`user:${userId}`]
     )
     .then((room) => {

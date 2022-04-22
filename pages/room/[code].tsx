@@ -1,8 +1,10 @@
-import { Query } from "appwrite";
+import { Models, Query } from "appwrite";
 import { appwrite, Collections } from "global/appwrite";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { ParsedRoom, Room } from "utils/models";
+import { API } from "utils/api";
+import { ParsedRoom, Room as RoomType } from "utils/models";
 
 type Props = {};
 
@@ -11,6 +13,19 @@ const Room = (props: Props) => {
   const { code } = router.query;
 
   const [room, setRoom] = useState<ParsedRoom | null>(null);
+  const [account, setAccount] =
+    useState<Models.User<Models.Preferences> | null>(null);
+
+  useEffect(() => {
+    const getAccount = async () => {
+      const res = await API.account.get();
+      if (res.isOK) {
+        setAccount(res.data);
+      }
+    };
+
+    getAccount();
+  }, []);
 
   useEffect(() => {
     let unsub = () => {};
@@ -18,7 +33,7 @@ const Room = (props: Props) => {
     const getRoom = async () => {
       if (!code) return;
 
-      const res = await appwrite.database.listDocuments<Room>(
+      const res = await appwrite.database.listDocuments<RoomType>(
         Collections.Room,
         [Query.equal("code", code)]
       );
@@ -40,32 +55,92 @@ const Room = (props: Props) => {
 
   const onGameStateChange = (roomId: string) => {
     const slug = `collections.${Collections.Room}.documents.${roomId}`;
-    return appwrite.subscribe(slug, (response) => {
+    return appwrite.subscribe<RoomType>(slug, (response) => {
       console.log("Detected game state change, re-rendering", response);
+      setRoom({
+        ...response.payload,
+        gameState: JSON.parse(response.payload.gameState),
+      });
     });
   };
 
-  if (!room) return <h1>Loading</h1>;
+  if (!room || !account) return <h1>Loading</h1>;
+
+  const markAnswer = async (questionId: string, option: string) => {
+    if (!account) return;
+
+    // const question = room.gameState[questionId]
+    // question.response[account.$id] = {
+    //   value: option
+    // }
+
+    // Move this logic to server side and calculate isCorrect.
+    // Also remove write access to this document for security reasons.
+    // Else, people can just hit the API and change response of other user.
+    try {
+      const res = await appwrite.database.updateDocument<RoomType>(
+        Collections.Room,
+        room?.$id,
+        {
+          gameState: JSON.stringify({
+            ...room.gameState,
+            [questionId]: {
+              ...room.gameState[questionId],
+              response: {
+                ...room.gameState[questionId].response,
+                [account.$id]: {
+                  value: option,
+                },
+              },
+            },
+          }),
+        }
+      );
+
+      console.log("Update success", res);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const questions = Object.entries(room.gameState);
 
   return (
-    <main>
-      <h1>Room Code: {room.code}</h1>
+    <>
+      <Head>
+        <title>Room | {room.code}</title>
+      </Head>
+      <main>
+        <h1>Room Code: {room.code}</h1>
 
-      <div>
-        {questions.map(([questionId, question]) => (
-          <div key={questionId}>
-            <img src={question.image} alt="" width="80px" height={80} />
-            <div>
-              {question.options.map((option) => (
-                <p key={option}>{option}</p>
-              ))}
+        <div>
+          {questions.map(([questionId, question]) => (
+            <div key={questionId}>
+              <img src={question.image} alt="" width="80px" height={80} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {question.options.map((option) => {
+                  const response = question.response;
+
+                  return (
+                    <button
+                      key={option}
+                      onClick={() => markAnswer(questionId, option)}
+                      style={
+                        response && response[account.$id]?.value === option
+                          ? { border: "2px solid purple" }
+                          : {}
+                      }
+                    >
+                      {option}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-    </main>
+          ))}
+        </div>
+      </main>
+    </>
   );
 };
 
