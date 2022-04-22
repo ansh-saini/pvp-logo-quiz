@@ -57,7 +57,9 @@ export default async function handler(
  */
 const getInitialGameState = async (roomId: string) => {
   const { total, documents: logos } = await database.listDocuments<Logo>(
-    Collections.Logo
+    Collections.Logo,
+    undefined,
+    100
   );
 
   const getOptions = () => {

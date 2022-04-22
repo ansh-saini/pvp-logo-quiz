@@ -75,7 +75,7 @@ const shouldCreate = (logo) => {
         try {
           await database.createDocument(Collections.Logo, "unique()", {
             name: logo,
-            image: IMG_PREFIX + fileName,
+            image: encodeURI(IMG_PREFIX + fileName),
             difficulty: 0,
             Category: "Automobile",
           });

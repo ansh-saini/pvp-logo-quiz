@@ -12,9 +12,8 @@ const init = () => {
     client
       .setEndpoint(APPWRITE_ENDPOINT)
       .setProject(APPWRITE_PROJECT)
-      .setKey(APPWRITE_SERVER_API_KEY)
-      .setSelfSigned(); // Use only on dev mode with a self-signed SSL cert
+      .setKey(APPWRITE_SERVER_API_KEY);
   }
 };
 
-init()
+init();
