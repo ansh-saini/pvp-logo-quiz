@@ -33,22 +33,42 @@ const Room = (props: Props) => {
   useEffect(() => {
     let unSubscribe = () => {};
 
+    const joinRoom = async () => {
+      if (!code || !account) return;
+
+      return postData(`/api/joinRoom/${code}`, {
+        userId: account.$id,
+      });
+    };
+
     const getRoom = async () => {
+      console.log("Get Room called");
       if (!code) return;
 
-      const res = await appwrite.database.listDocuments<RoomType>(
-        Collections.Room,
-        [Query.equal("code", code)]
-      );
-      const room = res.documents[0];
-      if (!room) {
-        throw new Error("Room not found");
+      try {
+        const res = await appwrite.database.listDocuments<RoomType>(
+          Collections.Room,
+          [Query.equal("code", code)]
+        );
+        const room = res.documents[0];
+        if (!room) {
+          console.error("Room not found");
+
+          joinRoom().then(getRoom);
+          return;
+        }
+
+        setRoom(parseRoomState(room));
+
+        unSubscribe = onGameStateChange(room.$id);
+      } catch (e: any) {
+        console.log(e);
+        if (e.response?.data) {
+          console.log(e.response);
+        }
       }
-
-      setRoom(parseRoomState(room));
-
-      unSubscribe = onGameStateChange(room.$id);
     };
+
     if (router.isReady && code) {
       getRoom();
     }

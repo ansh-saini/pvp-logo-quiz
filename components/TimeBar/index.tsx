@@ -15,7 +15,6 @@ const TimeBar = ({ onEnd }: Props) => {
       if (onEnd) onEnd();
     };
     if (el) {
-      console.log("Ayo");
       el.addEventListener("animationend", cb);
     }
 

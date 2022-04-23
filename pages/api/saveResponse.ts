@@ -22,9 +22,6 @@ export default async function handler(
         questionId
       );
 
-      // TODO: if playerId not in room.players. Return 400
-      const roomState = JSON.parse(room.gameState);
-
       // p1, p2, p3 etc...
       const playerIndex = `p${room.players.indexOf(playerId) + 1}` as
         | "p1"
@@ -40,15 +37,15 @@ export default async function handler(
         },
       };
 
-      console.log(updatedPlayerData);
-
       try {
         await database.updateDocument<Room>(Collections.Room, roomId, {
           [playerIndex]: JSON.stringify(updatedPlayerData),
         });
+        resolve();
         return res.status(200).json({});
       } catch (e) {
         console.error(e);
+        resolve();
         return res.status(400).json({ errors: e });
       }
     }
