@@ -5,6 +5,11 @@ export interface Logo extends Models.Document {
   image: string;
 }
 
+type PlayerData = {
+  response: string;
+  isCorrect: boolean;
+};
+
 export interface Room extends Models.Document {
   /**
    * A unique identifier for each room. Is used by clients to join rooms.
@@ -45,9 +50,9 @@ export type ParsedRoom = Omit<Room, "gameState" | "p1" | "p2"> & {
     };
   };
   // questionId: response
-  p1: { [key: string]: string }[];
+  p1: { [key: string]: PlayerData };
   // questionId: response
-  p2: { [key: string]: string }[];
+  p2: { [key: string]: PlayerData };
 };
 
 export type Question = Logo & { options: string[] };

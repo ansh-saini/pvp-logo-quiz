@@ -18,10 +18,14 @@ const ClientScores = ({ room, currentPlayer }: Props) => {
         if (!data) return null;
 
         const answered = Object.keys(data).length;
+        const correct = Object.values(data).filter(
+          ({ isCorrect }) => isCorrect
+        ).length;
 
         return (
           <p key={player}>
-            {player === playerIndex ? "You" : player} Answered: {answered}
+            {player === playerIndex ? "You" : player} Answered: {answered} (
+            {correct} Correct)
           </p>
         );
       })}
