@@ -1,5 +1,5 @@
+import { AppwriteException } from "appwrite";
 import { appwrite } from "global/appwrite";
-import { AppwriteException, Query } from "appwrite";
 
 export async function postData(url = "", data = {}) {
   // Default options are marked with *

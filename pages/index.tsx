@@ -26,7 +26,7 @@ const Home: NextPage = () => {
     const account = await appwrite.account.get();
 
     try {
-      const res = await postData("/api/createRoom/", {
+      const res = await postData("/api/createRoom", {
         owner: account.$id,
       });
       console.log(res);

@@ -12,36 +12,33 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const userId = req.body.owner;
-  database
-    .createDocument<Room>(
-      Collections.Room,
-      "unique()",
-      {
-        code: nanoid(10),
-        owner: userId,
-        gameState: JSON.stringify({}),
-        players: [userId],
-      },
-      [`user:${userId}`],
-      [`user:${userId}`]
-    )
-    .then((room) => {
-      getInitialGameState(room.$id)
-        .then(() => {
-          res.status(200).json({ code: room.code });
-        })
-        .catch(console.error);
+  return new Promise<void>((resolve) => {
+    if (req.method === "POST") {
+      const userId = req.body.owner;
+      database
+        .createDocument<Room>(
+          Collections.Room,
+          "unique()",
+          {
+            code: nanoid(10),
+            owner: userId,
+            gameState: JSON.stringify({}),
+            players: [userId],
+          },
+          [`user:${userId}`],
+          [`user:${userId}`]
+        )
+        .then((room) => {
+          getInitialGameState(room.$id)
+            .then(() => {
+              res.status(200).json({ code: room.code });
+            })
+            .catch(console.error);
+        });
+    }
 
-      // console.log({ room });
-      // promise
-      //   .then((response) => {
-      //     res.status(200).json(response);
-      //   })
-      //   .catch((err) => {
-      //     res.status(400).json(err);
-      //   });
-    });
+    return resolve();
+  });
 }
 
 /**
@@ -52,9 +49,6 @@ export default async function handler(
  * console.time laga ke dekhunga which one is faster
  * ORRR
  * I can just list all logos DB se. 2-3K entries aa jayengi kitna he time lagega. Instead of this randomizer shit which hits the DB like 50 times (if you include options)
- *
- * @param roomId
- * @returns
  */
 const getInitialGameState = async (roomId: string) => {
   const { total, documents: logos } = await database.listDocuments<Logo>(

@@ -1,9 +1,10 @@
 import { Models, Query } from "appwrite";
+import TimeBar from "components/TimeBar";
 import { appwrite, Collections } from "global/appwrite";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { API } from "utils/api";
+import { API, postData } from "utils/api";
 import { ParsedRoom, Room as RoomType } from "utils/models";
 
 type Props = {};
@@ -28,7 +29,7 @@ const Room = (props: Props) => {
   }, []);
 
   useEffect(() => {
-    let unsub = () => {};
+    let unSubscribe = () => {};
 
     const getRoom = async () => {
       if (!code) return;
@@ -44,13 +45,15 @@ const Room = (props: Props) => {
 
       setRoom({ ...room, gameState: JSON.parse(room.gameState) });
 
-      unsub = onGameStateChange(room.$id);
+      unSubscribe = onGameStateChange(room.$id);
     };
     if (router.isReady && code) {
       getRoom();
     }
 
-    return unsub;
+    return () => {
+      unSubscribe();
+    };
   }, [code, router]);
 
   const onGameStateChange = (roomId: string) => {
@@ -69,38 +72,14 @@ const Room = (props: Props) => {
   const markAnswer = async (questionId: string, option: string) => {
     if (!account) return;
 
-    // const question = room.gameState[questionId]
-    // question.response[account.$id] = {
-    //   value: option
-    // }
-
-    // Move this logic to server side and calculate isCorrect.
-    // Also remove write access to this document for security reasons.
-    // Else, people can just hit the API and change response of other user.
-    try {
-      const res = await appwrite.database.updateDocument<RoomType>(
-        Collections.Room,
-        room?.$id,
-        {
-          gameState: JSON.stringify({
-            ...room.gameState,
-            [questionId]: {
-              ...room.gameState[questionId],
-              response: {
-                ...room.gameState[questionId].response,
-                [account.$id]: {
-                  value: option,
-                },
-              },
-            },
-          }),
-        }
-      );
-
-      console.log("Update success", res);
-    } catch (e) {
-      console.error(e);
-    }
+    postData("/api/saveResponse", {
+      roomId: room.$id,
+      playerId: account.$id,
+      questionId: questionId,
+      response: option,
+    }).then(() => {
+      console.log("Updated");
+    });
   };
 
   const questions = Object.entries(room.gameState);
@@ -111,6 +90,8 @@ const Room = (props: Props) => {
         <title>Room | {room.code}</title>
       </Head>
       <main>
+        <TimeBar onEnd={() => console.log("time;s up")} />
+
         <h1>Room Code: {room.code}</h1>
 
         <div>
