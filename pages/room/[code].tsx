@@ -1,10 +1,12 @@
 import { Models, Query } from "appwrite";
+import ClientScores from "components/ClientScores";
 import TimeBar from "components/TimeBar";
 import { appwrite, Collections } from "global/appwrite";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { API, postData } from "utils/api";
+import { parseRoomState } from "utils/helpers";
 import { ParsedRoom, Room as RoomType } from "utils/models";
 
 type Props = {};
@@ -43,7 +45,7 @@ const Room = (props: Props) => {
         throw new Error("Room not found");
       }
 
-      setRoom({ ...room, gameState: JSON.parse(room.gameState) });
+      setRoom(parseRoomState(room));
 
       unSubscribe = onGameStateChange(room.$id);
     };
@@ -59,11 +61,8 @@ const Room = (props: Props) => {
   const onGameStateChange = (roomId: string) => {
     const slug = `collections.${Collections.Room}.documents.${roomId}`;
     return appwrite.subscribe<RoomType>(slug, (response) => {
-      console.log("Detected game state change, re-rendering", response);
-      setRoom({
-        ...response.payload,
-        gameState: JSON.parse(response.payload.gameState),
-      });
+      // console.log("Detected game state change, re-rendering", response);
+      setRoom(parseRoomState(response.payload));
     });
   };
 
@@ -77,8 +76,6 @@ const Room = (props: Props) => {
       playerId: account.$id,
       questionId: questionId,
       response: option,
-    }).then(() => {
-      console.log("Updated");
     });
   };
 
@@ -90,7 +87,8 @@ const Room = (props: Props) => {
         <title>Room | {room.code}</title>
       </Head>
       <main>
-        <TimeBar onEnd={() => console.log("time;s up")} />
+        <TimeBar />
+        <ClientScores room={room} currentPlayer={account.$id} />
 
         <h1>Room Code: {room.code}</h1>
 
