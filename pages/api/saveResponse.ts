@@ -2,7 +2,7 @@
 import { Collections } from "global/appwrite";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { database } from "server/appwrite";
-import { Room } from "utils/models";
+import { Logo, Room } from "utils/models";
 
 type Data = any;
 
@@ -12,25 +12,39 @@ export default async function handler(
 ) {
   return new Promise<void>(async (resolve) => {
     if (req.method === "POST") {
+      // TODO: Add authentication check here. We shouldn't be taking playerId in request.
+
       const { roomId, playerId, questionId, response } = req.body;
 
       const room = await database.getDocument<Room>(Collections.Room, roomId);
+      const { name: correctAnswer } = await database.getDocument<Logo>(
+        Collections.Logo,
+        questionId
+      );
+
+      // TODO: if playerId not in room.players. Return 400
       const roomState = JSON.parse(room.gameState);
+
+      // p1, p2, p3 etc...
+      const playerIndex = `p${room.players.indexOf(playerId) + 1}` as
+        | "p1"
+        | "p2";
+      const playerState = JSON.parse(room[playerIndex]);
+
+      const updatedPlayerData = {
+        ...playerState,
+        [questionId]: {
+          response,
+          // Check correct answer
+          isCorrect: response === correctAnswer,
+        },
+      };
+
+      console.log(updatedPlayerData);
 
       try {
         await database.updateDocument<Room>(Collections.Room, roomId, {
-          gameState: JSON.stringify({
-            ...roomState,
-            [questionId]: {
-              ...roomState[questionId],
-              response: {
-                ...roomState[questionId].response,
-                [playerId]: {
-                  value: response,
-                },
-              },
-            },
-          }),
+          [playerIndex]: JSON.stringify(updatedPlayerData),
         });
         return res.status(200).json({});
       } catch (e) {

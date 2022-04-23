@@ -14,19 +14,18 @@ export default async function handler(
 ) {
   return new Promise<void>((resolve) => {
     if (req.method === "POST") {
-      const userId = req.body.owner;
+      const ownerId = req.body.owner;
       database
         .createDocument<Room>(
           Collections.Room,
           "unique()",
           {
             code: nanoid(10),
-            owner: userId,
+            owner: ownerId,
             gameState: JSON.stringify({}),
-            players: [userId],
+            players: [ownerId],
           },
-          [`user:${userId}`],
-          [`user:${userId}`]
+          [`user:${ownerId}`]
         )
         .then((room) => {
           getInitialGameState(room.$id)
@@ -105,11 +104,7 @@ const getInitialGameState = async (roomId: string) => {
     const q: Question = { ...logos[randomInt], options: [] };
     q.options = getOptions().map((idx) => logos[idx].name);
     // Inserting correct answer at a random index
-    q.options.splice(
-      getRandomInt(0, q.options.length),
-      0,
-      `${q.name} (correct)`
-    );
+    q.options.splice(getRandomInt(0, q.options.length), 0, q.name);
 
     questions.documents.push(q);
     generatedInts.push(randomInt);
@@ -130,7 +125,6 @@ const formatQuestions = (questions: Models.DocumentList<Question>) => {
     obj[q.$id] = {
       options: q.options,
       image: q.image,
-      response: {},
     };
   });
   return obj;
