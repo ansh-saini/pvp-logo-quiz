@@ -106,7 +106,7 @@ const Room = (props: Props) => {
   const responses = room[playerIndex];
 
   const currentQuestion = questions.find(([questionId]) => {
-    return !responses[questionId];
+    return !responses?.[questionId];
   });
 
   return (
@@ -118,11 +118,12 @@ const Room = (props: Props) => {
         <TimeBar />
 
         <div className={styles.container}>
-          <ClientScores room={room} currentPlayer={account.$id} />
-
           <h1 style={{ marginBottom: 48 }}>Room Code: {room.code}</h1>
 
           <div className={styles.gameArea}>
+            <div>
+              <ClientScores room={room} currentPlayer={account.$id} />
+            </div>
             {currentQuestion ? (
               <div className={styles.question}>
                 {(() => {
@@ -162,6 +163,10 @@ const Room = (props: Props) => {
             ) : (
               <h3>Loading Question</h3>
             )}
+
+            <div>
+              <ClientScores room={room} currentPlayer={account.$id} />
+            </div>
 
             {/* {questions.map(([questionId, question]) => (
             <div key={questionId}>
