@@ -1,6 +1,7 @@
 import { Models, Query } from "appwrite";
 import ClientScores from "components/ClientScores";
-import TimeBar from "components/TimeBar";
+import Option from "components/Option";
+import Result from "components/Results";
 import { appwrite, Collections } from "global/appwrite";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -19,7 +20,21 @@ const Room = (props: Props) => {
   const { code } = router.query;
 
   const [room, setRoom] = useState<ParsedRoom | null>(null);
+  const [gameOver, setGameOver] = useState<boolean>(false);
   const [account, setAccount] = useState<Account | null>(null);
+
+  useEffect(() => {
+    if (!room || !account) return;
+
+    const playerIndex = getPlayerIndex(room, account.$id);
+    const questions = Object.keys(room.gameState);
+    const responses = room[playerIndex];
+
+    if (Object.keys(responses).length === questions.length) {
+      console.log("Game Over");
+      setGameOver(true);
+    }
+  }, [room, account]);
 
   useEffect(() => {
     let unSubscribe = () => {};
@@ -95,23 +110,24 @@ const Room = (props: Props) => {
 
   const playerIndex = getPlayerIndex(room, account.$id);
 
-  const markAnswer = async (questionId: string, option: string) => {
-    if (!account) return;
-
-    postData("/api/saveResponse", {
-      roomId: room.$id,
-      playerId: account.$id,
-      questionId: questionId,
-      response: option,
-    });
-  };
-
   const questions = Object.entries(room.gameState);
   const responses = room[playerIndex];
 
   const currentQuestion = questions.find(([questionId]) => {
     return !responses?.[questionId];
   });
+
+  if (gameOver) {
+    return (
+      <>
+        <Head>
+          <title>Results | {room.code}</title>
+        </Head>
+
+        <Result />
+      </>
+    );
+  }
 
   if (!currentQuestion) {
     return (
@@ -130,7 +146,7 @@ const Room = (props: Props) => {
       <Head>
         <title>Room | {room.code}</title>
       </Head>
-      <TimeBar />
+      {/* <TimeBar /> */}
 
       <div className={styles.container}>
         <h1 style={{ marginBottom: 48 }}>Room Code: {room.code}</h1>
@@ -141,6 +157,7 @@ const Room = (props: Props) => {
               room={room}
               playerId={account.$id}
               currentQuestionId={currentQuestion[0]}
+              isSelf
             />
           </div>
           {currentQuestion ? (
@@ -156,17 +173,14 @@ const Room = (props: Props) => {
                         const response = responses?.[questionId];
 
                         return (
-                          <button
+                          <Option
+                            userId={account.$id}
+                            roomId={room.$id}
+                            questionId={questionId}
+                            option={option}
+                            isMarked={response?.response === option}
                             key={`${questionId}-${option}`}
-                            onClick={() => markAnswer(questionId, option)}
-                            style={
-                              response?.response === option
-                                ? { border: "2px solid purple" }
-                                : {}
-                            }
-                          >
-                            {option}
-                          </button>
+                          />
                         );
                       })}
                     </div>

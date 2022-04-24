@@ -14,7 +14,7 @@ export default async function handler(
     if (req.method === "POST") {
       // TODO: Add authentication check here. We shouldn't be taking playerId in request.
 
-      const { roomId, playerId, questionId, response } = req.body;
+      const { roomId, playerId, questionId, response, timeStamp } = req.body;
 
       const room = await database.getDocument<Room>(Collections.Room, roomId);
       const { name: correctAnswer } = await database.getDocument<Logo>(
@@ -34,6 +34,7 @@ export default async function handler(
           response,
           // Check correct answer
           isCorrect: response === correctAnswer,
+          timeStamp,
         },
       };
 

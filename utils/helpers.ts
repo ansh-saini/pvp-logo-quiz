@@ -10,7 +10,9 @@ export const parseRoomState = (rawState: Room): ParsedRoom => ({
 });
 
 export const filterPlayerDataKeys = (room: ParsedRoom) => {
-  return Object.keys(room).filter((key) => key.length === 2 && key[0] === "p");
+  return Object.keys(room).filter(
+    (key) => key.length === 2 && key[0] === "p"
+  ) as SafeKeys[];
 };
 
 export const getPlayerIndex = (room: ParsedRoom, playerId: string) => {

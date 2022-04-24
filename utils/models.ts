@@ -5,9 +5,11 @@ export interface Logo extends Models.Document {
   image: string;
 }
 
-type PlayerData = {
+type ResponseData = {
   response: string;
   isCorrect: boolean;
+  // Time of marking the answer (used to calculate how who won)
+  timeStamp: number;
 };
 
 export interface Room extends Models.Document {
@@ -45,14 +47,13 @@ export type ParsedRoom = Omit<Room, "gameState" | "p1" | "p2"> & {
   gameState: {
     [key: string]: {
       image: string;
-      response: any;
       options: string[];
     };
   };
   // questionId: response
-  p1: { [key: string]: PlayerData };
+  p1: { [key: string]: ResponseData };
   // questionId: response
-  p2: { [key: string]: PlayerData };
+  p2: { [key: string]: ResponseData };
 };
 
 export type Question = Logo & { options: string[] };
