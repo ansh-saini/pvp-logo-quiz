@@ -5,6 +5,7 @@ import { appwrite, Collections } from "global/appwrite";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import styles from "styles/Room.module.css";
 import { API, postData } from "utils/api";
 import { getPlayerIndex, parseRoomState } from "utils/helpers";
 import { ParsedRoom, Room as RoomType } from "utils/models";
@@ -104,6 +105,10 @@ const Room = (props: Props) => {
   const questions = Object.entries(room.gameState);
   const responses = room[playerIndex];
 
+  const currentQuestion = questions.find(([questionId]) => {
+    return !responses[questionId];
+  });
+
   return (
     <>
       <Head>
@@ -111,12 +116,54 @@ const Room = (props: Props) => {
       </Head>
       <main>
         <TimeBar />
-        <ClientScores room={room} currentPlayer={account.$id} />
 
-        <h1>Room Code: {room.code}</h1>
+        <div className={styles.container}>
+          <ClientScores room={room} currentPlayer={account.$id} />
 
-        <div>
-          {questions.map(([questionId, question]) => (
+          <h1 style={{ marginBottom: 48 }}>Room Code: {room.code}</h1>
+
+          <div className={styles.gameArea}>
+            {currentQuestion ? (
+              <div className={styles.question}>
+                {(() => {
+                  const [questionId, question] = currentQuestion;
+
+                  return (
+                    <>
+                      <img
+                        src={question.image}
+                        alt=""
+                        width="80px"
+                        height={80}
+                      />
+                      <div className={styles.options}>
+                        {question.options.map((option) => {
+                          const response = responses?.[questionId];
+
+                          return (
+                            <button
+                              key={`${questionId}-${option}`}
+                              onClick={() => markAnswer(questionId, option)}
+                              style={
+                                response?.response === option
+                                  ? { border: "2px solid purple" }
+                                  : {}
+                              }
+                            >
+                              {option}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            ) : (
+              <h3>Loading Question</h3>
+            )}
+
+            {/* {questions.map(([questionId, question]) => (
             <div key={questionId}>
               <img src={question.image} alt="" width="80px" height={80} />
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -139,7 +186,8 @@ const Room = (props: Props) => {
                 })}
               </div>
             </div>
-          ))}
+          ))} */}
+          </div>
         </div>
       </main>
     </>
