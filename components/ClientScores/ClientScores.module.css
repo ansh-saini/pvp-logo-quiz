@@ -2,6 +2,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  /* --step-color: #9179e0; */
+  --step-color: #8f2cf2;
 }
 
 /* Component Styles - Steps */
@@ -81,7 +84,7 @@
 }
 .step:after {
   height: 0;
-  background-color: #ff2267;
+  background-color: var(--step-color);
 }
 .step--complete:after {
   height: 100% !important;
@@ -95,7 +98,7 @@
   position: relative;
   width: 1rem;
   height: 1rem;
-  background-color: #292627;
+  background-color: #9179e0;
   border: 0.25rem solid #e6e7e8;
   border-radius: 50%;
   color: transparent;
@@ -111,14 +114,17 @@
   transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out,
     color 0.3s ease-in-out;
 }
+
 .step--incomplete.step--active .step__icon {
-  border-color: #ff2267;
+  border-color: var(--step-color);
   transition-delay: 0.5s;
+  background-color: #fff;
 }
+
 .step--complete .step__icon {
   -webkit-animation: bounce 0.5s ease-in-out;
   animation: bounce 0.5s ease-in-out;
-  background-color: #ff2267;
-  border-color: #ff2267;
+  background-color: var(--step-color);
+  border-color: var(--step-color);
   color: #fff;
 }

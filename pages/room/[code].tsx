@@ -38,6 +38,8 @@ const Room = (props: Props) => {
         if (res.isOK) {
           setAccount(res.data);
           resolve(res.data);
+        } else {
+          router.push("/auth");
         }
       });
     };

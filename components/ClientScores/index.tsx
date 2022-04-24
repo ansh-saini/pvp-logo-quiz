@@ -59,8 +59,7 @@ const ClientScores = ({
             className={clsx(styles.step, {
               [styles["step--active"]]: step === i,
               [styles["step--complete"]]: step > i,
-              [styles["step--incomplete"]]: step < i,
-              [styles["step--inactive"]]: step !== i,
+              [styles["step--incomplete"]]: step <= i,
             })}
             key={i}
           >
