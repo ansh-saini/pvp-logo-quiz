@@ -6,7 +6,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { API, postData } from "utils/api";
-import { parseRoomState } from "utils/helpers";
+import { getPlayerIndex, parseRoomState } from "utils/helpers";
 import { ParsedRoom, Room as RoomType } from "utils/models";
 
 type Props = {};
@@ -88,6 +88,8 @@ const Room = (props: Props) => {
 
   if (!room || !account) return <h1>Loading</h1>;
 
+  const playerIndex = getPlayerIndex(room, account.$id);
+
   const markAnswer = async (questionId: string, option: string) => {
     if (!account) return;
 
@@ -100,6 +102,7 @@ const Room = (props: Props) => {
   };
 
   const questions = Object.entries(room.gameState);
+  const responses = room[playerIndex];
 
   return (
     <>
@@ -118,14 +121,14 @@ const Room = (props: Props) => {
               <img src={question.image} alt="" width="80px" height={80} />
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {question.options.map((option) => {
-                  const response = question.response;
+                  const response = responses?.[questionId];
 
                   return (
                     <button
                       key={option}
                       onClick={() => markAnswer(questionId, option)}
                       style={
-                        response && response[account.$id]?.value === option
+                        response?.response === option
                           ? { border: "2px solid purple" }
                           : {}
                       }
