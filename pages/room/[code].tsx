@@ -12,29 +12,19 @@ import { ParsedRoom, Room as RoomType } from "utils/models";
 
 type Props = {};
 
+type Account = Models.User<Models.Preferences>;
+
 const Room = (props: Props) => {
   const router = useRouter();
   const { code } = router.query;
 
   const [room, setRoom] = useState<ParsedRoom | null>(null);
-  const [account, setAccount] =
-    useState<Models.User<Models.Preferences> | null>(null);
-
-  useEffect(() => {
-    const getAccount = async () => {
-      const res = await API.account.get();
-      if (res.isOK) {
-        setAccount(res.data);
-      }
-    };
-
-    getAccount();
-  }, []);
+  const [account, setAccount] = useState<Account | null>(null);
 
   useEffect(() => {
     let unSubscribe = () => {};
 
-    const joinRoom = async () => {
+    const joinRoom = async (account: Account) => {
       if (!code || !account) return;
 
       return postData(`/api/joinRoom/${code}`, {
@@ -42,9 +32,19 @@ const Room = (props: Props) => {
       });
     };
 
-    const getRoom = async () => {
+    const getAccount = () => {
+      return new Promise<Account>(async (resolve) => {
+        const res = await API.account.get();
+        if (res.isOK) {
+          setAccount(res.data);
+          resolve(res.data);
+        }
+      });
+    };
+
+    const getRoom = async (account: Account) => {
+      if (!code || !account) return;
       console.log("Get Room called");
-      if (!code) return;
 
       try {
         const res = await appwrite.database.listDocuments<RoomType>(
@@ -55,7 +55,9 @@ const Room = (props: Props) => {
         if (!room) {
           console.error("Room not found");
 
-          joinRoom().then(getRoom);
+          joinRoom(account)
+            .then(() => getRoom(account))
+            .catch(console.error);
           return;
         }
 
@@ -63,7 +65,7 @@ const Room = (props: Props) => {
 
         unSubscribe = onGameStateChange(room.$id);
       } catch (e: any) {
-        console.log(e);
+        console.log(e, "ASD");
         if (e.response?.data) {
           console.log(e.response);
         }
@@ -71,7 +73,7 @@ const Room = (props: Props) => {
     };
 
     if (router.isReady && code) {
-      getRoom();
+      getAccount().then(getRoom);
     }
 
     return () => {
@@ -109,66 +111,84 @@ const Room = (props: Props) => {
     return !responses?.[questionId];
   });
 
+  if (!currentQuestion) {
+    return (
+      <>
+        <Head>
+          <title>Room | {room.code}</title>
+        </Head>
+
+        <h1>Could not fetch questions. Sry.</h1>
+      </>
+    );
+  }
+
   return (
     <>
       <Head>
         <title>Room | {room.code}</title>
       </Head>
-      <main>
-        <TimeBar />
+      <TimeBar />
 
-        <div className={styles.container}>
-          <h1 style={{ marginBottom: 48 }}>Room Code: {room.code}</h1>
+      <div className={styles.container}>
+        <h1 style={{ marginBottom: 48 }}>Room Code: {room.code}</h1>
 
-          <div className={styles.gameArea}>
-            <div>
-              <ClientScores room={room} currentPlayer={account.$id} />
+        <div className={styles.gameArea}>
+          <div>
+            <ClientScores
+              room={room}
+              playerId={account.$id}
+              currentQuestionId={currentQuestion[0]}
+            />
+          </div>
+          {currentQuestion ? (
+            <div className={styles.question}>
+              {(() => {
+                const [questionId, question] = currentQuestion;
+
+                return (
+                  <>
+                    <img src={question.image} alt="" width="80px" height={80} />
+                    <div className={styles.options}>
+                      {question.options.map((option) => {
+                        const response = responses?.[questionId];
+
+                        return (
+                          <button
+                            key={`${questionId}-${option}`}
+                            onClick={() => markAnswer(questionId, option)}
+                            style={
+                              response?.response === option
+                                ? { border: "2px solid purple" }
+                                : {}
+                            }
+                          >
+                            {option}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
-            {currentQuestion ? (
-              <div className={styles.question}>
-                {(() => {
-                  const [questionId, question] = currentQuestion;
+          ) : (
+            <h3>Loading Question</h3>
+          )}
 
-                  return (
-                    <>
-                      <img
-                        src={question.image}
-                        alt=""
-                        width="80px"
-                        height={80}
-                      />
-                      <div className={styles.options}>
-                        {question.options.map((option) => {
-                          const response = responses?.[questionId];
-
-                          return (
-                            <button
-                              key={`${questionId}-${option}`}
-                              onClick={() => markAnswer(questionId, option)}
-                              style={
-                                response?.response === option
-                                  ? { border: "2px solid purple" }
-                                  : {}
-                              }
-                            >
-                              {option}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </>
-                  );
-                })()}
+          {room.players
+            .filter((id) => id !== account.$id)
+            .map((playerId) => (
+              <div key={playerId}>
+                <ClientScores
+                  room={room}
+                  playerId={playerId}
+                  currentQuestionId={currentQuestion[0]}
+                />
               </div>
-            ) : (
-              <h3>Loading Question</h3>
-            )}
+            ))}
 
-            <div>
-              <ClientScores room={room} currentPlayer={account.$id} />
-            </div>
-
-            {/* {questions.map(([questionId, question]) => (
+          {/* {questions.map(([questionId, question]) => (
             <div key={questionId}>
               <img src={question.image} alt="" width="80px" height={80} />
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -192,9 +212,8 @@ const Room = (props: Props) => {
               </div>
             </div>
           ))} */}
-          </div>
         </div>
-      </main>
+      </div>
     </>
   );
 };

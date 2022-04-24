@@ -1,24 +1,40 @@
 import clsx from "clsx";
-import React, { useState } from "react";
-import { filterPlayerDataKeys, getPlayerIndex, SafeKeys } from "utils/helpers";
+import React from "react";
+import { getPlayerIndex } from "utils/helpers";
 import { ParsedRoom } from "utils/models";
 import styles from "./ClientScores.module.css";
-type Props = { room: ParsedRoom; currentPlayer: string };
 
-const ClientScores = ({ room, currentPlayer }: Props) => {
-  const playerIndex = getPlayerIndex(room, currentPlayer);
+type Props = {
+  room: ParsedRoom;
+  playerId: string;
+  isSelf?: boolean;
+  currentQuestionId: string;
+};
 
-  const [step, setStep] = useState(1);
+const ClientScores = ({
+  room,
+  playerId: playerId,
+  currentQuestionId,
+  isSelf = false,
+}: Props) => {
+  const playerIndex = getPlayerIndex(room, playerId);
 
-  const nextStep = () => {
-    setStep((p) => (p === 5 ? 1 : p + 1));
-  };
+  // console.log({ playerId, playerIndex });
+
+  const questions = Object.keys(room.gameState);
+
+  const playerData = room[playerIndex] || {};
+  // const step = Math.max(Object.keys(playerData).indexOf(currentQuestionId), 0);
+  const step = Object.keys(playerData).length;
+
+  // const answered = Object.keys(playerData).length;
+  // const correct = Object.values(playerData).filter(
+  //   ({ isCorrect }) => isCorrect
+  // ).length;
 
   return (
-    <div>
-      <h1>ClientScores</h1>
-
-      {filterPlayerDataKeys(room).map((player) => {
+    <div className={styles.container}>
+      {/* {filterPlayerDataKeys(room).map((player) => {
         const data = room[player as SafeKeys];
         if (!data) return null;
 
@@ -33,10 +49,12 @@ const ClientScores = ({ room, currentPlayer }: Props) => {
             {correct} Correct)
           </p>
         );
-      })}
+      })} */}
+
+      <h1>{isSelf ? "You" : playerId}</h1>
 
       <ul className={styles.steps}>
-        {[1, 2, 3, 4].map((i) => (
+        {questions.map((_, i) => (
           <li
             className={clsx(styles.step, {
               [styles["step--active"]]: step === i,
@@ -47,12 +65,9 @@ const ClientScores = ({ room, currentPlayer }: Props) => {
             key={i}
           >
             <span className={styles["step__icon"]}></span>
-            <span className={styles["step__label"]}>Step {i}</span>
           </li>
         ))}
       </ul>
-
-      <button onClick={nextStep}>Next Step</button>
     </div>
   );
 };
