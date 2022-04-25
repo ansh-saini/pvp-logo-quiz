@@ -30,7 +30,7 @@ const Room = (props: Props) => {
     const questions = Object.keys(room.gameState);
     const responses = room[playerIndex];
 
-    if (Object.keys(responses).length === questions.length) {
+    if (responses && Object.keys(responses).length === questions.length) {
       console.log("Game Over");
       setGameOver(true);
     }
@@ -117,14 +117,14 @@ const Room = (props: Props) => {
     return !responses?.[questionId];
   });
 
-  if (gameOver) {
+  if (gameOver && !currentQuestion) {
     return (
       <>
         <Head>
           <title>Results | {room.code}</title>
         </Head>
 
-        <Result />
+        <Result roomId={room.$id} />
       </>
     );
   }

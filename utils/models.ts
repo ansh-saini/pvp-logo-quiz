@@ -35,11 +35,11 @@ export interface Room extends Models.Document {
   /**
    * Responses of player1 (The owner)
    */
-  p1: string;
+  p1: string | undefined;
   /**
    * Responses of player2
    */
-  p2: string;
+  p2: string | undefined;
 }
 
 export type ParsedRoom = Omit<Room, "gameState" | "p1" | "p2"> & {
@@ -51,9 +51,9 @@ export type ParsedRoom = Omit<Room, "gameState" | "p1" | "p2"> & {
     };
   };
   // questionId: response
-  p1: { [key: string]: ResponseData };
+  p1: { [key: string]: ResponseData } | undefined;
   // questionId: response
-  p2: { [key: string]: ResponseData };
+  p2: { [key: string]: ResponseData } | undefined;
 };
 
 export type Question = Logo & { options: string[] };

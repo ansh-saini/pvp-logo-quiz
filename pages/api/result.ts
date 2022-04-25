@@ -13,7 +13,9 @@ export default async function handler(
 ) {
   return new Promise<void>(async (resolve) => {
     if (req.method === "GET") {
-      const { roomId } = req.body;
+      let { roomId } = req.query;
+
+      if (Array.isArray(roomId)) roomId = roomId[0];
 
       const rawRoom = await database.getDocument<Room>(
         Collections.Room,
@@ -27,24 +29,30 @@ export default async function handler(
 
       const data = filterPlayerDataKeys(room)
         .map((player) => {
-          const responses = Object.values(room[player]);
+          const responses = Object.values(room[player] || {});
 
           const correct = responses.filter(({ isCorrect }) => isCorrect).length;
 
-          return {
+          const obj = {
             player,
             correct,
             totalAnswered: responses.length,
             totalTime:
               responses[responses.length - 1].timeStamp -
-              responses[0].timeStamp,
+                responses[0].timeStamp || 0,
           };
+
+          console.log(obj);
+
+          return obj;
         })
-        .map(
-          ({ correct, totalAnswered, totalTime }) =>
-            correct * 1000 + totalAnswered * 10 + -1 * totalTime,
-          0
-        );
+        .map(({ correct, totalAnswered, totalTime, player }) => ({
+          player,
+          score: correct * 1000 + totalAnswered * 10 + (totalTime / 1000) * -1,
+        }))
+        .sort((a, b) => b.score - a.score);
+
+      console.log(data);
 
       // Math.max(
       //   ...data.map(function (o) {
@@ -54,7 +62,7 @@ export default async function handler(
 
       try {
         resolve();
-        return res.status(200).json({});
+        return res.status(200).json({ data });
       } catch (e) {
         console.error(e);
         resolve();
