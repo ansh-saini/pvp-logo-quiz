@@ -1,0 +1,18 @@
+.container {
+  padding: 24px;
+  background-color: #efebfa;
+}
+
+.card {
+  margin: auto;
+  max-width: 600px;
+  width: 90vw;
+  /* height: 100%; */
+  box-shadow: 5px 5px 8px 3px #decee7;
+  padding: 40px;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-between;
+}

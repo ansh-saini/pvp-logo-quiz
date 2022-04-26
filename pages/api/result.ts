@@ -32,33 +32,26 @@ export default async function handler(
           const responses = Object.values(room[player] || {});
 
           const correct = responses.filter(({ isCorrect }) => isCorrect).length;
+          const totalAnswered = responses.length;
+          const totalTime =
+            responses[responses.length - 1].timeStamp -
+              responses[0].timeStamp || 0;
 
           const obj = {
+            // responses,
             player,
             correct,
-            totalAnswered: responses.length,
-            totalTime:
-              responses[responses.length - 1].timeStamp -
-                responses[0].timeStamp || 0,
+            totalAnswered,
+            totalTime,
+            score:
+              correct * 1000 + totalAnswered * 10 + (totalTime / 1000) * -1,
           };
-
-          console.log(obj);
 
           return obj;
         })
-        .map(({ correct, totalAnswered, totalTime, player }) => ({
-          player,
-          score: correct * 1000 + totalAnswered * 10 + (totalTime / 1000) * -1,
-        }))
         .sort((a, b) => b.score - a.score);
 
       console.log(data);
-
-      // Math.max(
-      //   ...data.map(function (o) {
-      //     return o.correct;
-      //   })
-      // );
 
       try {
         resolve();
