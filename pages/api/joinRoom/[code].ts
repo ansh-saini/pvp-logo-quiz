@@ -4,6 +4,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { Query } from "node-appwrite";
 import { database } from "server/appwrite";
 import { Room } from "utils/models";
+import { getInitialGameState } from "../createRoom";
 
 type Data = any;
 
@@ -35,12 +36,17 @@ export default async function handler(
         return res.status(400).json({ roomFull: true });
       }
 
+      const gameState = await getInitialGameState(roomId);
+
       // Add user to the room
       await database.updateDocument<Room>(
         Collections.Room,
         roomId,
         {
           players: [...room.players, userId],
+          gameState: JSON.stringify(gameState),
+          status: "started",
+          startTime: Date.now(),
         },
         // Give read access to the new player
         [...room.$read, `user:${userId}`]

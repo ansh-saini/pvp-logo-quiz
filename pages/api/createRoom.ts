@@ -24,15 +24,16 @@ export default async function handler(
             owner: ownerId,
             gameState: JSON.stringify({}),
             players: [ownerId],
+            status: "lobby",
           },
           [`user:${ownerId}`]
         )
         .then((room) => {
-          getInitialGameState(room.$id)
-            .then(() => {
-              res.status(200).json({ code: room.code });
-            })
-            .catch(console.error);
+          // getInitialGameState(room.$id)
+          //   .then(() => {
+          res.status(200).json({ code: room.code });
+          // })
+          // .catch(console.error);
         });
     }
 
@@ -40,16 +41,7 @@ export default async function handler(
   });
 }
 
-/**
- * TODO: Options generate file system se bhi kar skte hain.
- * Can do this for questions as well. Random file names utha ke Query me pass kar dunga. Ek sath 10 question aa jayenge.
- * Will shuffle them using JS then.
- * HMM
- * console.time laga ke dekhunga which one is faster
- * ORRR
- * I can just list all logos DB se. 2-3K entries aa jayengi kitna he time lagega. Instead of this randomizer shit which hits the DB like 50 times (if you include options)
- */
-const getInitialGameState = async (roomId: string) => {
+export const getInitialGameState = async (roomId: string) => {
   const { total, documents: logos } = await database.listDocuments<Logo>(
     Collections.Logo,
     undefined,
@@ -113,9 +105,8 @@ const getInitialGameState = async (roomId: string) => {
 
   console.log(`Questions loop ran ${count} times`);
   console.log(`Returning with ${questions.documents.length} questions`);
-  return database.updateDocument(Collections.Room, roomId, {
-    gameState: JSON.stringify(formatQuestions(questions)),
-  });
+
+  return formatQuestions(questions);
 };
 
 const formatQuestions = (questions: Models.DocumentList<Question>) => {

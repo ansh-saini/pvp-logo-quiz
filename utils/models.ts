@@ -22,10 +22,19 @@ export interface Room extends Models.Document {
    */
   owner: string;
   /**
+   * Status of the room.
+   */
+  status: "started" | "completed" | "lobby";
+  /**
+   * Time when status changed to "started"
+   * Date.now()
+   */
+  startTime: number | undefined;
+  /**
    * A JSON representing the state of the game.
    * Stores the questions that were generated for a particular game.
    */
-  gameState: string;
+  gameState: string | undefined;
   /**
    * Array of userIds who will be participating in the game
    * The (index + 1) represents player number.

@@ -2,11 +2,16 @@ import { ParsedRoom, Room } from "./models";
 
 export type SafeKeys = "p1" | "p2";
 
-export const parseRoomState = (rawState: Room): ParsedRoom => ({
+export const parseRoomState = ({
+  gameState,
+  p1,
+  p2,
+  ...rawState
+}: Room): ParsedRoom => ({
   ...rawState,
-  gameState: JSON.parse(rawState.gameState),
-  p1: JSON.parse(rawState.p1),
-  p2: JSON.parse(rawState.p2),
+  gameState: gameState ? JSON.parse(gameState) : gameState,
+  p1: p1 ? JSON.parse(p1) : p1,
+  p2: p2 ? JSON.parse(p2) : p2,
 });
 
 export const filterPlayerDataKeys = (room: ParsedRoom) => {

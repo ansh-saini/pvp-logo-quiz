@@ -11,17 +11,17 @@ import { API, postData } from "utils/api";
 import { getPlayerIndex, parseRoomState } from "utils/helpers";
 import { ParsedRoom, Room as RoomType } from "utils/models";
 
-type Props = {};
-
 type Account = Models.User<Models.Preferences>;
 
-const Room = (props: Props) => {
+const Room = () => {
   const router = useRouter();
   const { code } = router.query;
 
   const [room, setRoom] = useState<ParsedRoom | null>(null);
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [account, setAccount] = useState<Account | null>(null);
+
+  const [startTimer, setStartTimer] = useState(0);
 
   useEffect(() => {
     if (!room || !account) return;
@@ -35,6 +35,13 @@ const Room = (props: Props) => {
       setGameOver(true);
     }
   }, [room, account]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      console.log("Start Timer", startTimer);
+      if (startTimer > 0) setStartTimer((p) => p - 1);
+    }, 1000);
+  }, [startTimer]);
 
   useEffect(() => {
     let unSubscribe = () => {};
@@ -102,7 +109,17 @@ const Room = (props: Props) => {
     const slug = `collections.${Collections.Room}.documents.${roomId}`;
     return appwrite.subscribe<RoomType>(slug, (response) => {
       // console.log("Detected game state change, re-rendering", response);
-      setRoom(parseRoomState(response.payload));
+      setRoom((prevState) => {
+        if (
+          prevState?.status === "lobby" &&
+          response.payload.status === "started"
+        ) {
+          console.log("Start 3s Timer");
+          setStartTimer(3);
+        }
+
+        return parseRoomState(response.payload);
+      });
     });
   };
 
@@ -116,6 +133,40 @@ const Room = (props: Props) => {
   const currentQuestion = questions.find(([questionId]) => {
     return !responses?.[questionId];
   });
+
+  if (startTimer) {
+    return (
+      <>
+        <Head>
+          <title>
+            Starting in {startTimer}... | {room.code}
+          </title>
+        </Head>
+
+        <h1>All players have joined.</h1>
+        <h1>Starting in {startTimer}</h1>
+      </>
+    );
+  }
+
+  if (room.status === "lobby") {
+    return (
+      <>
+        <Head>
+          <title>Lobby | {room.code}</title>
+        </Head>
+
+        <h1>Please wait while the other players join. Share room code.</h1>
+        <button
+          onClick={() => {
+            setStartTimer(3);
+          }}
+        >
+          Start the timer
+        </button>
+      </>
+    );
+  }
 
   if (gameOver && !currentQuestion) {
     return (
