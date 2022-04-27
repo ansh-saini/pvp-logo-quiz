@@ -16,3 +16,11 @@
   display: flex;
   justify-content: space-between;
 }
+
+.stats {
+  font-weight: bold;
+}
+
+.stats span {
+  font-weight: normal;
+}

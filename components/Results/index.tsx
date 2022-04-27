@@ -33,16 +33,25 @@ const Result = ({ roomId }: Props) => {
         {winner && <h1>Winner is: {winner.player}</h1>}
 
         <h1>Stats</h1>
-        {/* <pre>{JSON.stringify(result, null, 2)}</pre> */}
         <div className={styles.stats}>
           {result.map((d) => (
             <div key={d.player}>
-              <p>Player: {d.player}</p>
-              <p>Score: {d.score}</p>
               <p>
-                Correct Answers: {d.correct}/{d.totalAnswered}
+                Player: <span>{d.player}</span>
               </p>
-              <p>Time Taken: {d.totalTime}</p>
+              <p>
+                Score: <span>{Math.round(d.score)}</span>
+              </p>
+              <p>
+                Correct Answers:{" "}
+                <span>
+                  {d.correct}/{d.totalAnswered}
+                </span>
+              </p>
+              <p>
+                Time Taken:{" "}
+                <span>{Math.round(d.totalTime / 1000)} seconds</span>
+              </p>
             </div>
           ))}
         </div>

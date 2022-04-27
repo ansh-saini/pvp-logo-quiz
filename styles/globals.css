@@ -15,6 +15,11 @@ body {
   /* background-color: #efebfa; */
 }
 
+p {
+  margin-top: 0px;
+  margin-bottom: 8px;
+}
+
 a {
   color: inherit;
   text-decoration: none;
