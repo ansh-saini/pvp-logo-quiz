@@ -1,8 +1,9 @@
-import { Client, Database } from "node-appwrite";
+import { Client, Database, Users } from "node-appwrite";
 
 // Init SDK
 export const client = new Client();
 export const database = new Database(client);
+export const users = new Users(client);
 
 const init = () => {
   const { APPWRITE_ENDPOINT, APPWRITE_PROJECT, APPWRITE_SERVER_API_KEY } =
