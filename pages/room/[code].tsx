@@ -1,5 +1,6 @@
 import { Models, Query } from "appwrite";
 import ClientScores from "components/ClientScores";
+import Lobby from "components/Lobby";
 import Option from "components/Option";
 import Result from "components/Results";
 import { appwrite, Collections } from "global/appwrite";
@@ -80,7 +81,12 @@ const Room = () => {
           console.error("Room not found");
 
           joinRoom(account)
-            .then(() => getRoom(account))
+            .then((res) => {
+              getRoom(account);
+              if (res.started) {
+                setStartTimer(3);
+              }
+            })
             .catch(console.error);
           return;
         }
@@ -150,34 +156,11 @@ const Room = () => {
   }
 
   if (room.status === "lobby") {
-    return (
-      <>
-        <Head>
-          <title>Lobby | {room.code}</title>
-        </Head>
-
-        <h1>Please wait while the other players join. Share room code.</h1>
-        <button
-          onClick={() => {
-            setStartTimer(3);
-          }}
-        >
-          Start the timer
-        </button>
-      </>
-    );
+    return <Lobby room={room} />;
   }
 
   if (gameOver && !currentQuestion) {
-    return (
-      <>
-        <Head>
-          <title>Results | {room.code}</title>
-        </Head>
-
-        <Result roomId={room.$id} />
-      </>
-    );
+    return <Result room={room} />;
   }
 
   if (!currentQuestion) {

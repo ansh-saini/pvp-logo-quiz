@@ -3,6 +3,7 @@ import { Collections } from "global/appwrite";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Query } from "node-appwrite";
 import { database } from "server/appwrite";
+import { MAX_PLAYERS } from "utils/config";
 import { Room } from "utils/models";
 import { getInitialGameState } from "../createRoom";
 
@@ -31,12 +32,16 @@ export default async function handler(
         return res.status(200).json({ joined: true });
       }
 
-      if (room.players.length >= 2) {
+      if (room.players.length >= MAX_PLAYERS) {
         resolve();
         return res.status(400).json({ roomFull: true });
       }
 
       const gameState = await getInitialGameState(roomId);
+
+      // If room capacity was 2, and there was 1 player already in the room, then we mark the room as started because the final player is just about to join.
+      const roomStatus: Room["status"] =
+        room.players.length === MAX_PLAYERS - 1 ? "started" : "lobby";
 
       // Add user to the room
       await database.updateDocument<Room>(
@@ -45,7 +50,7 @@ export default async function handler(
         {
           players: [...room.players, userId],
           gameState: JSON.stringify(gameState),
-          status: "started",
+          status: roomStatus,
           startTime: Date.now(),
         },
         // Give read access to the new player
@@ -53,7 +58,7 @@ export default async function handler(
       );
 
       resolve();
-      return res.status(200).json({ joined: true });
+      return res.status(200).json({ joined: true, started: true });
     }
 
     resolve();
