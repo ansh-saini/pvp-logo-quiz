@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import React from "react";
 import { getPlayerIndex } from "utils/helpers";
-import { ParsedRoom } from "utils/models";
+import { ParsedRoom, Players } from "utils/models";
 import styles from "./ClientScores.module.css";
 
 type Props = {
@@ -9,11 +9,13 @@ type Props = {
   playerId: string;
   isSelf?: boolean;
   currentQuestionId: string;
+  playerNames: Players;
 };
 
 const ClientScores = ({
+  playerNames,
   room,
-  playerId: playerId,
+  playerId,
   currentQuestionId,
   isSelf = false,
 }: Props) => {
@@ -51,7 +53,7 @@ const ClientScores = ({
         );
       })} */}
 
-      <h1>{isSelf ? "You" : playerId}</h1>
+      <h1>{isSelf ? "You" : playerNames[playerId]}</h1>
 
       <ul className={styles.steps}>
         {questions.map((_, i) => (

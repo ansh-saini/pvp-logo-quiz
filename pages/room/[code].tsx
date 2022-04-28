@@ -8,9 +8,9 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import styles from "styles/Room.module.css";
-import { API, postData } from "utils/api";
+import { API, getData, postData } from "utils/api";
 import { getPlayerIndex, parseRoomState } from "utils/helpers";
-import { ParsedRoom, Room as RoomType } from "utils/models";
+import { ParsedRoom, Players, Room as RoomType } from "utils/models";
 
 type Account = Models.User<Models.Preferences>;
 
@@ -20,6 +20,8 @@ const Room = () => {
 
   const [room, setRoom] = useState<ParsedRoom | null>(null);
   const [gameOver, setGameOver] = useState<boolean>(false);
+
+  const [players, setPlayers] = useState<Players>({});
   const [account, setAccount] = useState<Account | null>(null);
 
   const [startTimer, setStartTimer] = useState(0);
@@ -67,6 +69,11 @@ const Room = () => {
       });
     };
 
+    const getPlayers = async () => {
+      const res = await getData(`/api/players/${code}`);
+      setPlayers(res.data);
+    };
+
     const getRoom = async (account: Account) => {
       if (!code || !account) return;
       console.log("Get Room called");
@@ -91,6 +98,7 @@ const Room = () => {
           return;
         }
 
+        getPlayers();
         setRoom(parseRoomState(room));
 
         unSubscribe = onGameStateChange(room.$id);
@@ -160,7 +168,7 @@ const Room = () => {
   }
 
   if (gameOver && !currentQuestion) {
-    return <Result room={room} />;
+    return <Result room={room} playerNames={players} />;
   }
 
   if (!currentQuestion) {
@@ -188,6 +196,7 @@ const Room = () => {
         <div className={styles.gameArea}>
           <div>
             <ClientScores
+              playerNames={players}
               room={room}
               playerId={account.$id}
               currentQuestionId={currentQuestion[0]}
@@ -232,6 +241,7 @@ const Room = () => {
               <div key={playerId}>
                 <ClientScores
                   room={room}
+                  playerNames={players}
                   playerId={playerId}
                   currentQuestionId={currentQuestion[0]}
                 />

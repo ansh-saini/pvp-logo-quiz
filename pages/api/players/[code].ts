@@ -19,13 +19,10 @@ export default async function handler(
       );
       const room = documents[0];
 
-      const data = [];
+      const data: Record<string, string> = {};
       for (const playerId of room.players) {
         const { name, $id } = await users.get(playerId);
-        data.push({
-          $id,
-          name,
-        });
+        data[$id] = name;
       }
 
       resolve();

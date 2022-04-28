@@ -1,9 +1,9 @@
 import Head from "next/head";
 import React, { useEffect, useState } from "react";
-import { ParsedRoom } from "utils/models";
+import { ParsedRoom, Players } from "utils/models";
 import styles from "./Result.module.css";
 
-type Props = { room: ParsedRoom };
+type Props = { room: ParsedRoom; playerNames: Players };
 
 type Result = {
   player: string;
@@ -13,10 +13,11 @@ type Result = {
   score: number;
 };
 
-const Result = ({ room }: Props) => {
+const Result = ({ room, playerNames }: Props) => {
   const [result, setResult] = useState<Result[] | null>(null);
 
   const winner = result ? result[0] : null;
+  // console.log(playerNames, winner?.player);
 
   useEffect(() => {
     fetch(`/api/result/?roomId=${room.$id}`)
@@ -33,14 +34,14 @@ const Result = ({ room }: Props) => {
       </Head>
       <div className={styles.container}>
         <div className={styles.card}>
-          {winner && <h1>Winner is: {winner.player}</h1>}
+          {winner && <h1>Winner is: {playerNames[winner.player]}</h1>}
 
           <h1>Stats</h1>
           <div className={styles.stats}>
             {result.map((d) => (
               <div key={d.player}>
                 <p>
-                  Player: <span>{d.player}</span>
+                  Player: <span>{playerNames[d.player]}</span>
                 </p>
                 <p>
                   Score: <span>{Math.round(d.score)}</span>

@@ -14,6 +14,17 @@ export async function postData(url = "", data = {}) {
   return response.json(); // parses JSON response into native JavaScript objects
 }
 
+export async function getData(url = "") {
+  // Default options are marked with *
+  const response = await fetch(url, {
+    method: "GET", // *GET, POST, PUT, DELETE, etc.
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response.json(); // parses JSON response into native JavaScript objects
+}
+
 export const API = {
   account: {
     async get() {

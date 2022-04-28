@@ -66,3 +66,11 @@ export type ParsedRoom = Omit<Room, "gameState" | "p1" | "p2"> & {
 };
 
 export type Question = Logo & { options: string[] };
+
+/**
+ * Not actually a model on appwrite.
+ */
+export type Players = {
+  // $id: name
+  [key: string]: string;
+};
