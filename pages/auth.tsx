@@ -1,3 +1,6 @@
+import PageLayout from "components/PageLayout";
+import Button from "components/shared/Button";
+import Input from "components/shared/Input";
 import { appwrite } from "global/appwrite";
 import type { NextPage } from "next";
 import Head from "next/head";
@@ -51,51 +54,38 @@ const Auth: NextPage = () => {
       );
   };
 
-  const getAccountDetails = () => {
-    let promise = appwrite.account.get();
-
-    promise.then(
-      function (response) {
-        console.log(response); // Success
-      },
-      function (error) {
-        console.log(error); // Failure
-      }
-    );
-  };
-
   return (
-    <div className={styles.container}>
+    <>
       <Head>
         <title>Login/Signup</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <button onClick={getAccountDetails}>Get account details</button>
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
-          <input
-            type="text"
-            id="email"
-            name="email"
-            value={formState.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formState.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        {/* <div className="form-group">
+      <PageLayout>
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <div className="form-group">
+            <Input
+              label="Email"
+              type="text"
+              id="email"
+              name="email"
+              value={formState.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <Input
+              label="Password"
+              type="password"
+              id="password"
+              name="password"
+              value={formState.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          {/* <div className="form-group">
           <label className="form-remember">
             <input type="checkbox" />
             Remember Me
@@ -104,11 +94,12 @@ const Auth: NextPage = () => {
             Forgot Password?
           </a>
         </div> */}
-        <div className="form-group">
-          <button type="submit">Log In</button>
-        </div>
-      </form>
-    </div>
+          <div className="form-group">
+            <Button type="submit">Log In</Button>
+          </div>
+        </form>
+      </PageLayout>
+    </>
   );
 };
 

@@ -1,0 +1,9 @@
+.root {
+  padding: 12px 24px;
+  border: 10px solid black;
+  border-radius: 8px;
+  width: 100%;
+
+  font-weight: 800;
+  background-color: #33ff00;
+}
