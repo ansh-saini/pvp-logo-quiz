@@ -5,5 +5,15 @@
   width: 100%;
 
   font-weight: 800;
-  background-color: #33ff00;
+  background-color: var(--green);
+  transition: background-color 500ms;
+}
+
+.root:hover {
+  background-color: var(--red);
+}
+
+.root:active {
+  transition-duration: 100ms;
+  background-color: #ca2c2c;
 }

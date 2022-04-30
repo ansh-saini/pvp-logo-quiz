@@ -12,5 +12,5 @@
 }
 .root span:nth-child(2) {
   margin-left: 50px;
-  color: red;
+  color: var(--red);
 }
