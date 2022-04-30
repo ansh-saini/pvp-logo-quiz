@@ -26,6 +26,11 @@ export default async function handler(
         [Query.equal("code", code)]
       );
       const room = documents[0];
+
+      if (!room) {
+        resolve();
+        return res.status(404).json({ roomNotFound: true });
+      }
       const roomId = room.$id;
 
       // Player had already joined once before.

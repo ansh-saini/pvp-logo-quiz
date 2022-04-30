@@ -1,19 +1,20 @@
 import PageLayout from "components/PageLayout";
 import Button from "components/shared/Button";
 import Input from "components/shared/Input";
-import { appwrite } from "global/appwrite";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import styles from "styles/Home.module.css";
 import { API, postData } from "utils/api";
+import { Account } from "utils/models";
 
 const Home: NextPage = () => {
   const router = useRouter();
 
   const [showTextField, setShowTextField] = useState(false);
   const [code, setCode] = useState("");
+  const [account, setAccount] = useState<Account | null>(null);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   // const createUser = () => {
@@ -30,7 +31,7 @@ const Home: NextPage = () => {
   // };
 
   const createRoom = async () => {
-    const account = await appwrite.account.get();
+    if (!account) return;
 
     try {
       const res = await postData("/api/createRoom", {
@@ -53,7 +54,9 @@ const Home: NextPage = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const res = await API.account.get();
-      if (!res.isOK) {
+      if (res.isOK) {
+        setAccount(res.data);
+      } else {
         // Navigate to login
         router.replace("/auth");
       }
@@ -87,6 +90,7 @@ const Home: NextPage = () => {
 
       {/* <button onClick={logout}>Click me to logout</button> */}
       <main className={styles.main}>
+        <h1>Welcome {account?.name}!</h1>
         <Button onClick={createRoom}>Create Room</Button>
 
         {showTextField && (

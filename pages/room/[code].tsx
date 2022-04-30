@@ -1,4 +1,4 @@
-import { Models, Query } from "appwrite";
+import { Query } from "appwrite";
 import ClientScores from "components/ClientScores";
 import Lobby from "components/Lobby";
 import Option from "components/Option";
@@ -12,9 +12,7 @@ import React, { useEffect, useState } from "react";
 import styles from "styles/Room.module.css";
 import { API, getData, postData } from "utils/api";
 import { getPlayerIndex, parseRoomState } from "utils/helpers";
-import { ParsedRoom, Players, Room as RoomType } from "utils/models";
-
-type Account = Models.User<Models.Preferences>;
+import { Account, ParsedRoom, Players, Room as RoomType } from "utils/models";
 
 const getPlayers = async (code: string, room: ParsedRoom) => {
   const res = await getData(`/api/players/${code}`);
@@ -30,6 +28,7 @@ const Room = () => {
   const { code } = router.query;
 
   const [room, setRoom] = useState<ParsedRoom | null>(null);
+  const [invalidRoom, setInvalidRoom] = useState<boolean>(false);
   const [gameOverForSelf, setGameOverForSelf] = useState<boolean>(false);
 
   const [players, setPlayers] = useState<Players>({});
@@ -94,6 +93,18 @@ const Room = () => {
 
           joinRoom(account)
             .then((res) => {
+              if (res.roomNotFound) {
+                setInvalidRoom(true);
+                return;
+              }
+              if (res.joined) {
+                setInvalidRoom(true);
+                return;
+              }
+              if (res.roomFull) {
+                setInvalidRoom(true);
+                return;
+              }
               getRoom(account);
               if (res.started) {
                 setStartTimer(3);
@@ -152,6 +163,15 @@ const Room = () => {
       });
     });
   };
+
+  if (invalidRoom) {
+    return (
+      <PageLayout>
+        <h1>Looks like this room does not exist.</h1>
+        <h1>Check your room code.</h1>
+      </PageLayout>
+    );
+  }
 
   if (!room || !account) return <h1>Loading</h1>;
 

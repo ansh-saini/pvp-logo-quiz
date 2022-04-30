@@ -75,3 +75,5 @@ export type Players = {
   // $id: name
   [key: string]: string;
 };
+
+export type Account = Models.User<Models.Preferences>;
