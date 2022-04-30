@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import Button from "components/shared/Button";
 import React, { useCallback, useEffect } from "react";
 import styles from "./TimeBar.module.css";
 
@@ -28,7 +27,7 @@ const TimeBar = ({ onEnd, questionId }: Props) => {
       node.parentNode?.replaceChild(el, node);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [onEnd]);
 
   useEffect(() => {
     cb();
@@ -45,7 +44,7 @@ const TimeBar = ({ onEnd, questionId }: Props) => {
         <div className={clsx(styles.inner, styles.purple)} />
       </div>
 
-      <Button onClick={cb}>Reset</Button>
+      {/* <Button onClick={cb}>Reset</Button> */}
     </div>
   );
 };

@@ -1,6 +1,5 @@
 .container {
   padding: 24px;
-  background-color: #efebfa;
 }
 
 .card {
@@ -8,7 +7,6 @@
   max-width: 600px;
   width: 90vw;
   /* height: 100%; */
-  box-shadow: 5px 5px 8px 3px #decee7;
   padding: 40px;
 }
 
@@ -23,4 +21,41 @@
 
 .stats span {
   font-weight: normal;
+}
+
+.rotateColorsAnimation {
+  font-style: italic;
+  padding: 0px 10px;
+  animation: rotate-colors 2s infinite;
+  will-change: color, background-color;
+
+  border: 5px solid black;
+  background-color: white;
+}
+
+@keyframes rotate-colors {
+  0% {
+    color: var(--cat-red);
+    background-color: white;
+  }
+  20% {
+    color: var(--cat-orange);
+    background-color: black;
+  }
+  40% {
+    color: var(--cat-yellow);
+    background-color: black;
+  }
+  60% {
+    color: var(--cat-green);
+    background-color: black;
+  }
+  80% {
+    color: var(--cat-blue);
+    background-color: white;
+  }
+  100% {
+    background-color: white;
+    color: var(--cat-purple);
+  }
 }

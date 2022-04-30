@@ -1,4 +1,7 @@
+import PageLayout from "components/PageLayout";
+import Button from "components/shared/Button";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { ParsedRoom, Players } from "utils/models";
 import styles from "./Result.module.css";
@@ -14,10 +17,10 @@ type Result = {
 };
 
 const Result = ({ room, playerNames }: Props) => {
+  const { push } = useRouter();
   const [result, setResult] = useState<Result[] | null>(null);
 
   const winner = result ? result[0] : null;
-  // console.log(playerNames, winner?.player);
 
   useEffect(() => {
     fetch(`/api/result/?roomId=${room.$id}`)
@@ -28,13 +31,20 @@ const Result = ({ room, playerNames }: Props) => {
   if (!result) return null;
 
   return (
-    <>
+    <PageLayout>
       <Head>
         <title>Results | {room.code}</title>
       </Head>
       <div className={styles.container}>
         <div className={styles.card}>
-          {winner && <h1>Winner is: {playerNames[winner.player]}</h1>}
+          {winner && (
+            <h1>
+              Winner is:{" "}
+              <span className={styles.rotateColorsAnimation}>
+                {playerNames[winner.player]}
+              </span>
+            </h1>
+          )}
 
           <h1>Stats</h1>
           <div className={styles.stats}>
@@ -60,8 +70,16 @@ const Result = ({ room, playerNames }: Props) => {
             ))}
           </div>
         </div>
+
+        <Button
+          onClick={() => {
+            push("/");
+          }}
+        >
+          Play Again
+        </Button>
       </div>
-    </>
+    </PageLayout>
   );
 };
 

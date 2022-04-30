@@ -16,6 +16,15 @@ import { ParsedRoom, Players, Room as RoomType } from "utils/models";
 
 type Account = Models.User<Models.Preferences>;
 
+const getPlayers = async (code: string, room: ParsedRoom) => {
+  const res = await getData(`/api/players/${code}`);
+  for (const [k, v] of Object.entries(res.data)) {
+    const playerIndex = getPlayerIndex(room, k);
+    res.data[playerIndex] = v;
+  }
+  return res.data;
+};
+
 const Room = () => {
   const router = useRouter();
   const { code } = router.query;
@@ -43,7 +52,6 @@ const Room = () => {
 
   useEffect(() => {
     setTimeout(() => {
-      console.log("Start Timer", startTimer);
       if (startTimer > 0) setStartTimer((p) => p - 1);
     }, 1000);
   }, [startTimer]);
@@ -71,11 +79,6 @@ const Room = () => {
       });
     };
 
-    const getPlayers = async () => {
-      const res = await getData(`/api/players/${code}`);
-      setPlayers(res.data);
-    };
-
     const getRoom = async (account: Account) => {
       if (!code || !account) return;
       console.log("Get Room called");
@@ -100,8 +103,9 @@ const Room = () => {
           return;
         }
 
-        getPlayers();
-        setRoom(parseRoomState(room));
+        const parsedRoom = parseRoomState(room);
+        setPlayers(await getPlayers(parsedRoom.code, parsedRoom));
+        setRoom(parsedRoom);
 
         unSubscribe = onGameStateChange(room.$id);
       } catch (e: any) {
@@ -119,7 +123,12 @@ const Room = () => {
     return () => {
       unSubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code, router]);
+
+  const updatePlayers = async (room: ParsedRoom) => {
+    setPlayers(await getPlayers(room.code, room));
+  };
 
   const onGameStateChange = (roomId: string) => {
     const slug = `collections.${Collections.Room}.documents.${roomId}`;
@@ -133,7 +142,13 @@ const Room = () => {
           setStartTimer(3);
         }
 
-        return parseRoomState(response.payload);
+        const parsedRoom = parseRoomState(response.payload);
+
+        if (prevState?.players.length !== response.payload.players.length) {
+          updatePlayers(parsedRoom);
+        }
+
+        return parsedRoom;
       });
     });
   };

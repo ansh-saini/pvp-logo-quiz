@@ -10,6 +10,13 @@
 :root {
   --red: #fe0000;
   --green: #34fe02;
+
+  --cat-red: #fe0001;
+  --cat-orange: #fd9a00;
+  --cat-yellow: #ffff01;
+  --cat-green: #33ff00;
+  --cat-blue: #0098fd;
+  --cat-purple: #6734ff;
 }
 
 html,
