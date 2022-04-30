@@ -34,3 +34,8 @@
 .options button:hover {
   cursor: pointer;
 }
+
+.timer {
+  font-size: 64px;
+  color: var(--green);
+}

@@ -2,6 +2,7 @@ import { Models, Query } from "appwrite";
 import ClientScores from "components/ClientScores";
 import Lobby from "components/Lobby";
 import Option from "components/Option";
+import PageLayout from "components/PageLayout";
 import Result from "components/Results";
 import { appwrite, Collections } from "global/appwrite";
 import Head from "next/head";
@@ -150,7 +151,7 @@ const Room = () => {
 
   if (startTimer) {
     return (
-      <>
+      <PageLayout>
         <Head>
           <title>
             Starting in {startTimer}... | {room.code}
@@ -158,8 +159,10 @@ const Room = () => {
         </Head>
 
         <h1>All players have joined.</h1>
-        <h1>Starting in {startTimer}</h1>
-      </>
+        <h1>
+          Starting in <span className={styles.timer}>{startTimer}</span>
+        </h1>
+      </PageLayout>
     );
   }
 
@@ -184,15 +187,13 @@ const Room = () => {
   }
 
   return (
-    <>
+    <PageLayout>
       <Head>
         <title>Room | {room.code}</title>
       </Head>
       {/* <TimeBar /> */}
 
       <div className={styles.container}>
-        <h1 style={{ marginBottom: 48 }}>Room Code: {room.code}</h1>
-
         <div className={styles.gameArea}>
           <div>
             <ClientScores
@@ -274,7 +275,7 @@ const Room = () => {
           ))} */}
         </div>
       </div>
-    </>
+    </PageLayout>
   );
 };
 

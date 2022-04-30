@@ -76,10 +76,10 @@
   content: "";
   transform: translateY(50%);
   will-change: height;
-  z-index: -1;
 }
 .step:before {
   height: 100%;
+  box-shadow: 1px 1px 6px 0px rgb(0 0 0 / 50%);
   background-color: #e6e7e8;
 }
 .step:after {
@@ -103,6 +103,7 @@
   border-radius: 50%;
   color: transparent;
   font-size: 2rem;
+  box-shadow: 1px 1px 6px 0px rgb(0 0 0 / 50%);
 }
 /* .step__icon:before {
   display: block;
