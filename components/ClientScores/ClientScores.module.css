@@ -4,7 +4,7 @@
   align-items: center;
 
   /* --step-color: #9179e0; */
-  --step-color: #8f2cf2;
+  --step-color: #ff99ff;
 }
 
 /* Component Styles - Steps */
@@ -40,6 +40,18 @@
   }
   100% {
     transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    background-color: #ffcc98;
+  }
+  /* 50% {
+    background-color: black;
+  } */
+  100% {
+    background-color: red;
   }
 }
 
@@ -98,7 +110,7 @@
   position: relative;
   width: 1rem;
   height: 1rem;
-  background-color: #9179e0;
+  background-color: #999999;
   border: 0.25rem solid #e6e7e8;
   border-radius: 50%;
   color: transparent;
@@ -117,6 +129,7 @@
 }
 
 .step--incomplete.step--active .step__icon {
+  animation: pulse 0.5s ease alternate infinite;
   border-color: var(--step-color);
   transition-delay: 0.5s;
   background-color: #fff;
