@@ -4,11 +4,17 @@ import styles from "./Button.module.css";
 
 type Props = {
   children: React.ReactNode;
+  color?: "danger";
 } & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
-const Button = ({ children, className, ...props }: Props) => {
+const Button = ({ color, children, className, ...props }: Props) => {
   return (
-    <button className={clsx(styles.root, className)} {...props}>
+    <button
+      className={clsx(styles.root, className, {
+        [styles["Button-danger"]]: color === "danger",
+      })}
+      {...props}
+    >
       {children}
     </button>
   );

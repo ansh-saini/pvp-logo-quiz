@@ -102,6 +102,9 @@ const Home: NextPage = () => {
         )}
 
         <Button onClick={joinRoom}>Join Room</Button>
+        <Button color="danger" onClick={logout}>
+          Logout
+        </Button>
       </main>
     </PageLayout>
   );
