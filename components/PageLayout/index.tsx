@@ -1,3 +1,4 @@
+import Logo from "components/Logo";
 import React from "react";
 import styles from "./PageLayout.module.css";
 
@@ -7,9 +8,12 @@ type Props = {
 
 const PageLayout = ({ children }: Props) => {
   return (
-    <div className={styles.container}>
-      <div className={styles.content}>{children}</div>
-    </div>
+    <>
+      <Logo className={styles.logoPosition} />
+      <div className={styles.container}>
+        <div className={styles.content}>{children}</div>
+      </div>
+    </>
   );
 };
 

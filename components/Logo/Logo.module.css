@@ -1,0 +1,16 @@
+.root {
+  font-size: 64px;
+
+  flex-direction: column;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.root span:nth-child(1) {
+  color: white;
+}
+.root span:nth-child(2) {
+  margin-left: 50px;
+  color: red;
+}
