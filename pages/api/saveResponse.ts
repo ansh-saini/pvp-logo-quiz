@@ -2,7 +2,7 @@
 import { Collections } from "global/appwrite";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { database } from "server/appwrite";
-import { Logo, Room } from "utils/models";
+import { Logo, ResponseData, Room } from "utils/models";
 
 type Data = any;
 
@@ -14,7 +14,8 @@ export default async function handler(
     if (req.method === "POST") {
       // TODO: Add authentication check here. We shouldn't be taking playerId in request.
 
-      const { roomId, playerId, questionId, response, timeStamp } = req.body;
+      const { roomId, playerId, questionId, response, timeStamp, isSkipped } =
+        req.body;
 
       const room = await database.getDocument<Room>(Collections.Room, roomId);
       const { name: correctAnswer } = await database.getDocument<Logo>(
@@ -26,15 +27,17 @@ export default async function handler(
       const playerIndex = `p${room.players.indexOf(playerId) + 1}` as
         | "p1"
         | "p2";
-      const playerState = JSON.parse(room[playerIndex]);
 
-      const updatedPlayerData = {
+      const playerState = JSON.parse(room[playerIndex] || "{}");
+
+      const updatedPlayerData: { [key: string]: ResponseData } = {
         ...playerState,
         [questionId]: {
           response,
           // Check correct answer
           isCorrect: response === correctAnswer,
           timeStamp,
+          isSkipped: isSkipped || false,
         },
       };
 
