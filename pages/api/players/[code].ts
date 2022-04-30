@@ -4,11 +4,12 @@ import { Query } from "node-appwrite";
 import { database, users } from "server/appwrite";
 import { Room } from "utils/models";
 
-type Data = any;
-
+/**
+ * API to list the names of players in a room.
+ */
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse<any>
 ) {
   return new Promise<void>(async (resolve) => {
     if (req.method === "GET") {
@@ -20,6 +21,7 @@ export default async function handler(
       const room = documents[0];
 
       const data: Record<string, string> = {};
+      // Mapping playerId with their name
       for (const playerId of room.players) {
         const { name, $id } = await users.get(playerId);
         data[$id] = name;

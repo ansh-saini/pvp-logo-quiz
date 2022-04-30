@@ -1,15 +1,24 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { Collections } from "global/appwrite";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { database } from "server/appwrite";
 import { parseRoomState, SafeKeys } from "utils/helpers";
 import { Logo, ResponseData, Room } from "utils/models";
 
-type Data = any;
-
+/**
+ * API to save user's response for the question
+ * Also calculates if the response was correct or not.
+ *
+ * User may have skipped the question (maybe the time ran out), in that case we get `isSkipped: true`
+ *
+ * Also checks if all players have answered all questions.
+ * In that case, game is over for everyone and we can now show the users the result page.
+ *
+ * (We cannot show the result page until all players have finished because
+ * we need to calculate the final scores of each player before determining the winner)
+ */
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse<any>
 ) {
   return new Promise<void>(async (resolve) => {
     if (req.method === "POST") {
@@ -43,31 +52,30 @@ export default async function handler(
       };
       const { gameState } = parseRoomState(room);
 
-      const isGameOver = () => {
+      const isGameOverForAllPlayers = () => {
         const statues = room.players.map((localPlayerId) => {
           const playerIndex = `p${
             room.players.indexOf(localPlayerId) + 1
           }` as SafeKeys;
           const responses =
+            // When we're checking current user's data we need to check the latest data.
             localPlayerId === playerId
               ? updatedPlayerData
               : JSON.parse(room[playerIndex] || "{}");
 
           const noOfQuestions = Object.keys(gameState).length;
 
-          // Game over
+          // If all questions have a response object associated with them, that means user has gone through all the questions
           return responses && Object.keys(responses).length === noOfQuestions;
         });
 
-        return statues.every((bool) => bool === true);
+        return statues.every((gameOver) => gameOver === true);
       };
-
-      const gameOverForAllPlayers = isGameOver();
 
       try {
         await database.updateDocument<Room>(Collections.Room, roomId, {
           [playerIndex]: JSON.stringify(updatedPlayerData),
-          status: gameOverForAllPlayers ? "completed" : room.status,
+          status: isGameOverForAllPlayers() ? "completed" : room.status,
         });
         resolve();
         return res.status(200).json({});

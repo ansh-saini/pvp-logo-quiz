@@ -1,16 +1,19 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { Collections } from "global/appwrite";
 import { nanoid } from "nanoid";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Models } from "node-appwrite";
 import { database } from "server/appwrite";
+import { getRandomInt } from "utils/helpers";
 import { Logo, Question, Room } from "utils/models";
 
-type Data = any;
-
+/**
+ * This API is responsible for creating rooms.
+ * Generates a unique room code.
+ * Gives read access to the creator of the room.
+ */
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse<any>
 ) {
   return new Promise<void>((resolve) => {
     if (req.method === "POST") {
@@ -29,11 +32,7 @@ export default async function handler(
           [`user:${ownerId}`]
         )
         .then((room) => {
-          // getInitialGameState(room.$id)
-          //   .then(() => {
           res.status(200).json({ code: room.code });
-          // })
-          // .catch(console.error);
         });
     }
 
@@ -41,20 +40,26 @@ export default async function handler(
   });
 }
 
-export const getInitialGameState = async (roomId: string) => {
+/**
+ * This function is responsible for generating the questions for each game
+ * It generates the questions and options by loading the list of all logos and then randomly selecting indices from that list.
+ * Also adds the correct answer in the list of options of the respective question.
+ * Duplicates are never produced.
+ */
+export const getInitialGameState = async () => {
   const { total, documents: logos } = await database.listDocuments<Logo>(
     Collections.Logo,
     undefined,
     100
   );
 
-  const getOptions = () => {
+  const getWrongOptions = (correctOption: string) => {
     const NUMBER_OF_OPTIONS = 3;
-    const a: number[] = [];
+    const options: number[] = [];
     const generatedInts: number[] = [];
     let count = 0;
 
-    while (a.length < NUMBER_OF_OPTIONS) {
+    while (options.length < NUMBER_OF_OPTIONS) {
       count += 1;
       const randomInt = getRandomInt(0, questions.total);
 
@@ -63,18 +68,20 @@ export const getInitialGameState = async (roomId: string) => {
         continue;
       }
 
-      // console.log(`Adding ${randomInt}`);
+      /**
+       * We cannot add the correct answer to the random options list.
+       * We add it manually after this function is called.
+       */
+      if (logos[randomInt].name === correctOption) continue;
 
-      a.push(randomInt);
+      options.push(randomInt);
       generatedInts.push(randomInt);
     }
-    console.log(`Options loop ran ${count} times`);
+    // console.log(`Options loop ran ${count} times`);
 
-    return a;
+    return options;
   };
 
-  // console.log(x);
-  // Get total entries
   let count = 0;
   const NUMBER_OF_QUESTIONS = 10;
   const questions: Models.DocumentList<Question> = {
@@ -94,7 +101,8 @@ export const getInitialGameState = async (roomId: string) => {
     }
 
     const q: Question = { ...logos[randomInt], options: [] };
-    q.options = getOptions().map((idx) => logos[idx].name);
+    // Converting indices to names
+    q.options = getWrongOptions(q.name).map((idx) => logos[idx].name);
     // Inserting correct answer at a random index
     q.options.splice(getRandomInt(0, q.options.length), 0, q.name);
 
@@ -103,12 +111,15 @@ export const getInitialGameState = async (roomId: string) => {
     // console.log(total, documents.length, questions.documents.length);
   }
 
-  console.log(`Questions loop ran ${count} times`);
-  console.log(`Returning with ${questions.documents.length} questions`);
+  // console.log(`Questions loop ran ${count} times`);
+  // console.log(`Returning with ${questions.documents.length} questions`);
 
   return formatQuestions(questions);
 };
 
+/**
+ * Strips out any additional data from the Question which is not required
+ */
 const formatQuestions = (questions: Models.DocumentList<Question>) => {
   const obj: Record<string, any> = {};
 
@@ -120,11 +131,3 @@ const formatQuestions = (questions: Models.DocumentList<Question>) => {
   });
   return obj;
 };
-
-function getRandomInt(min: number, max: number) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-
-  // The maximum is exclusive and the minimum is inclusive
-  return Math.floor(Math.random() * (max - min) + min);
-}
