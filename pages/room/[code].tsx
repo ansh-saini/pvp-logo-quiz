@@ -211,7 +211,9 @@ const Room = () => {
 
                 return (
                   <>
-                    <img src={question.image} alt="" width="80px" height={80} />
+                    <div className={styles.imgContainer}>
+                      <img src={question.image} alt="" width={80} height={80} />
+                    </div>
                     <div className={styles.options}>
                       {question.options.map((option) => {
                         const response = responses?.[questionId];

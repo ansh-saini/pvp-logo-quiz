@@ -11,23 +11,29 @@
 }
 
 .question {
-  min-width: 300px;
   gap: 16px;
   display: flex;
   flex-direction: column;
 }
 
-.question img {
-  margin: auto;
+.imgContainer {
+  margin-top: 80px;
+  min-width: 300px;
+  min-height: 300px;
+  display: grid;
+  place-items: center;
+  border: 10px solid black;
 }
 
 .options {
+  margin-top: 40px;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 .options button {
+  border: 5px solid black;
   padding: 8px 16px;
 }
 
