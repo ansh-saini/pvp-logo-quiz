@@ -1,10 +1,18 @@
-.progressbar {
-  /* width: 80%;
-  margin: 25px auto;
-  border: solid 1px #000; */
+.root {
+  border: 5px solid black;
 }
+
+@keyframes progressbar-countdown {
+  0% {
+    width: 100%;
+  }
+  100% {
+    width: 0%;
+  }
+}
+
 .progressbar .inner {
-  height: 10px;
+  height: 3px;
   animation: progressbar-countdown;
   /* Placeholder, this will be updated using javascript */
   animation-duration: 3s;
@@ -17,13 +25,22 @@
   /* We want a linear animation, ease-out is standard */
   animation-timing-function: linear;
 }
-@keyframes progressbar-countdown {
-  0% {
-    width: 100%;
-    background: #0f0;
-  }
-  100% {
-    width: 0%;
-    background: #f00;
-  }
+
+.red {
+  background-color: #fe0001;
+}
+.orange {
+  background-color: #fd9a00;
+}
+.yellow {
+  background-color: #ffff01;
+}
+.green {
+  background-color: #33ff00;
+}
+.blue {
+  background-color: #0098fd;
+}
+.purple {
+  background-color: #6734ff;
 }

@@ -5,9 +5,10 @@ export interface Logo extends Models.Document {
   image: string;
 }
 
-type ResponseData = {
+export type ResponseData = {
   response: string;
   isCorrect: boolean;
+  isSkipped: boolean;
   // Time of marking the answer (used to calculate how who won)
   timeStamp: number;
 };

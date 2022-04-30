@@ -4,6 +4,7 @@ import Lobby from "components/Lobby";
 import Option from "components/Option";
 import PageLayout from "components/PageLayout";
 import Result from "components/Results";
+import TimeBar from "components/TimeBar";
 import { appwrite, Collections } from "global/appwrite";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -129,7 +130,6 @@ const Room = () => {
           prevState?.status === "lobby" &&
           response.payload.status === "started"
         ) {
-          console.log("Start 3s Timer");
           setStartTimer(3);
         }
 
@@ -148,6 +148,18 @@ const Room = () => {
   const currentQuestion = questions.find(([questionId]) => {
     return !responses?.[questionId];
   });
+
+  const onTimerEnd = () => {
+    if (currentQuestion) {
+      postData("/api/saveResponse", {
+        roomId: room.$id,
+        playerId: account.$id,
+        questionId: currentQuestion[0],
+        isSkipped: true,
+        timeStamp: Date.now(),
+      });
+    }
+  };
 
   if (startTimer) {
     return (
@@ -191,7 +203,7 @@ const Room = () => {
       <Head>
         <title>Room | {room.code}</title>
       </Head>
-      {/* <TimeBar /> */}
+      <TimeBar questionId={currentQuestion[0]} onEnd={onTimerEnd} />
 
       <div className={styles.container}>
         <div className={styles.gameArea}>
