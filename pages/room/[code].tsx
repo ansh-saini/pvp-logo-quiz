@@ -30,7 +30,7 @@ const Room = () => {
   const { code } = router.query;
 
   const [room, setRoom] = useState<ParsedRoom | null>(null);
-  const [gameOver, setGameOver] = useState<boolean>(false);
+  const [gameOverForSelf, setGameOverForSelf] = useState<boolean>(false);
 
   const [players, setPlayers] = useState<Players>({});
   const [account, setAccount] = useState<Account | null>(null);
@@ -46,7 +46,7 @@ const Room = () => {
 
     if (responses && Object.keys(responses).length === questions.length) {
       console.log("Game Over");
-      setGameOver(true);
+      setGameOverForSelf(true);
     }
   }, [room, account]);
 
@@ -197,8 +197,17 @@ const Room = () => {
     return <Lobby room={room} />;
   }
 
-  if (gameOver && !currentQuestion) {
+  if (gameOverForSelf && room.status === "completed") {
     return <Result room={room} playerNames={players} />;
+  }
+
+  if (gameOverForSelf) {
+    return (
+      <PageLayout>
+        <h1>Calculating Results</h1>
+        <h1>Waiting for other players to finish the game</h1>
+      </PageLayout>
+    );
   }
 
   if (!currentQuestion) {

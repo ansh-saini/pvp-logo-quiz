@@ -29,7 +29,12 @@ const Lobby = ({ room }: Props) => {
 
       <h1>Share room code</h1>
 
-      <Input ref={inputRef} value={room.code} className={styles.input} />
+      <Input
+        ref={inputRef}
+        value={room.code}
+        className={styles.input}
+        readOnly
+      />
       <Button onClick={copyText}>
         {copied ? "Copied!" : "Click to copy code"}
       </Button>

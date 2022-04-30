@@ -2,6 +2,7 @@
 import { Collections } from "global/appwrite";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { database } from "server/appwrite";
+import { parseRoomState, SafeKeys } from "utils/helpers";
 import { Logo, ResponseData, Room } from "utils/models";
 
 type Data = any;
@@ -40,10 +41,33 @@ export default async function handler(
           isSkipped: isSkipped || false,
         },
       };
+      const { gameState } = parseRoomState(room);
+
+      const isGameOver = () => {
+        const statues = room.players.map((localPlayerId) => {
+          const playerIndex = `p${
+            room.players.indexOf(localPlayerId) + 1
+          }` as SafeKeys;
+          const responses =
+            localPlayerId === playerId
+              ? updatedPlayerData
+              : JSON.parse(room[playerIndex] || "{}");
+
+          const noOfQuestions = Object.keys(gameState).length;
+
+          // Game over
+          return responses && Object.keys(responses).length === noOfQuestions;
+        });
+
+        return statues.every((bool) => bool === true);
+      };
+
+      const gameOverForAllPlayers = isGameOver();
 
       try {
         await database.updateDocument<Room>(Collections.Room, roomId, {
           [playerIndex]: JSON.stringify(updatedPlayerData),
+          status: gameOverForAllPlayers ? "completed" : room.status,
         });
         resolve();
         return res.status(200).json({});
