@@ -12,9 +12,11 @@ const Auth: NextPage = () => {
   const router = useRouter();
 
   const [formState, setFormState] = useState({
-    email: "",
-    password: "",
+    email: "a",
+    password: "a",
   });
+
+  const [error, setError] = useState("");
 
   const handleChange = (e: any) => {
     setFormState((prevState) => ({
@@ -31,28 +33,28 @@ const Auth: NextPage = () => {
     );
 
     promise.then(
-      function (response) {
+      function () {
+        setError("");
         router.push("/");
-        console.log(response); // Success
       },
-      function (error) {
-        console.log(error); // Failure
+      function () {
+        setError("Invalid Credentials");
       }
     );
   };
 
-  const createUser = () => {
-    appwrite.account
-      .create("unique()", "me@example.com", "password", "Jane Doe")
-      .then(
-        (response) => {
-          console.log(response);
-        },
-        (error) => {
-          console.log(error);
-        }
-      );
-  };
+  // const createUser = () => {
+  //   appwrite.account
+  //     .create("unique()", "me@example.com", "password", "Jane Doe")
+  //     .then(
+  //       (response: any) => {
+  //         console.log(response);
+  //       },
+  //       (error: any) => {
+  //         console.log(error);
+  //       }
+  //     );
+  // };
 
   return (
     <>
@@ -85,15 +87,7 @@ const Auth: NextPage = () => {
               required
             />
           </div>
-          {/* <div className="form-group">
-          <label className="form-remember">
-            <input type="checkbox" />
-            Remember Me
-          </label>
-          <a className="form-recovery" href="#">
-            Forgot Password?
-          </a>
-        </div> */}
+          {error && <p className={styles.error}>{error}</p>}
           <div className="form-group">
             <Button type="submit">Log In</Button>
           </div>

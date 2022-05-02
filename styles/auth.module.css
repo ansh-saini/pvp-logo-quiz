@@ -7,5 +7,12 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
+}
+
+.error {
+  border: 5px solid black;
+  padding: 0px 8px;
+  background-color: var(--cat-red);
+  margin: 0px;
 }
