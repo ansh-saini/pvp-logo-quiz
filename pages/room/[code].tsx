@@ -97,17 +97,16 @@ const Room = () => {
                 setInvalidRoom(true);
                 return;
               }
-              if (res.joined) {
-                setInvalidRoom(true);
-                return;
-              }
               if (res.roomFull) {
-                setInvalidRoom(true);
                 return;
               }
+
               getRoom(account);
               if (res.started) {
                 setStartTimer(3);
+              }
+              if (res.joined) {
+                return;
               }
             })
             .catch(console.error);
