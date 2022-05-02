@@ -73,8 +73,8 @@ export default async function handler(
 
           return obj;
         })
-        // Sort by score (descending)
-        .sort((a, b) => b.score - a.score);
+        // Sort by score (descending), then by time (ascending)
+        .sort((a, b) => b.score - a.score || a.totalTime - b.totalTime);
 
       try {
         resolve();
