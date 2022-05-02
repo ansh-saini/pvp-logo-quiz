@@ -77,7 +77,7 @@ const shouldCreate = (logo) => {
             name: logo,
             image: encodeURI(IMG_PREFIX + fileName),
             difficulty: 0,
-            Category: "Automobile",
+            category: "Automobile",
           });
           console.log(`Created ${logo}`);
           count += 1;
