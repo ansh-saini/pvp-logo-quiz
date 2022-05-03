@@ -13,6 +13,13 @@
   align-items: center;
 }
 
+.instructions {
+  max-width: 600px;
+}
+.instructions li {
+  margin-bottom: 8px;
+}
+
 .main button {
   font-size: 32px;
 }
@@ -24,4 +31,21 @@
 
 .inputInput {
   height: 28px;
+}
+
+.pageLayoutContent {
+  position: relative;
+}
+
+.sideButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.sideButtons button  {
+  width: auto;
 }
