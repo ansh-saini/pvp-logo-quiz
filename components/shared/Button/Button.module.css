@@ -25,3 +25,9 @@
   background-color: var(--cat-red);
   filter: brightness(0.85);
 }
+
+
+.Button-dense {
+  border-width: 5px;
+  padding: 4px 16px;
+}
