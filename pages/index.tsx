@@ -55,7 +55,9 @@ const Home: NextPage = () => {
     if (router.isReady) checkAuth();
   }, [router]);
 
-  const joinRoom = () => {
+  const joinRoom = (e: HTMLFormElement) => {
+    e.preventDefault();
+
     if (code) {
       router.push(`/room/${code}`);
       return;
@@ -105,12 +107,15 @@ const Home: NextPage = () => {
           </ul>
         </main>
       ) : (
-        <main className={styles.main}>
+        <form className={styles.main} onSubmit={joinRoom}>
           <h1>Welcome {account?.name}!</h1>
-          <Button onClick={createRoom}>Create Room</Button>
+          <Button type="button" onClick={createRoom}>
+            Create Room
+          </Button>
 
           {showTextField && (
             <Input
+              required
               ref={inputRef}
               placeholder="Enter room code"
               className={styles.input}
@@ -121,11 +126,11 @@ const Home: NextPage = () => {
             />
           )}
 
-          <Button onClick={joinRoom}>Join Room</Button>
-          <Button color="danger" onClick={logout}>
+          <Button type="submit">Join Room</Button>
+          <Button color="danger" type="button" onClick={logout}>
             Logout
           </Button>
-        </main>
+        </form>
       )}
     </PageLayout>
   );

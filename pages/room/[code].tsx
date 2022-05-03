@@ -50,9 +50,13 @@ const Room = () => {
   }, [room, account]);
 
   useEffect(() => {
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       if (startTimer > 0) setStartTimer((p) => p - 1);
     }, 1000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [startTimer]);
 
   useEffect(() => {
@@ -80,7 +84,6 @@ const Room = () => {
 
     const getRoom = async (account: Account) => {
       if (!code || !account) return;
-      console.log("Get Room called");
 
       try {
         const res = await appwrite.database.listDocuments<RoomType>(
@@ -119,9 +122,9 @@ const Room = () => {
 
         unSubscribe = onGameStateChange(room.$id);
       } catch (e: any) {
-        console.log(e, "ASD");
+        console.error(e);
         if (e.response?.data) {
-          console.log(e.response);
+          console.error(e.response);
         }
       }
     };
@@ -246,7 +249,7 @@ const Room = () => {
       <Head>
         <title>Room | {room.code}</title>
       </Head>
-      <TimeBar questionId={currentQuestion[0]} onEnd={onTimerEnd} />
+      <TimeBar questionId={currentQuestion[0]} onEnd={() => {}} />
 
       <div className={styles.container}>
         <div className={styles.gameArea}>
@@ -305,31 +308,6 @@ const Room = () => {
                 />
               </div>
             ))}
-
-          {/* {questions.map(([questionId, question]) => (
-            <div key={questionId}>
-              <img src={question.image} alt="" width="80px" height={80} />
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {question.options.map((option) => {
-                  const response = responses?.[questionId];
-
-                  return (
-                    <button
-                      key={option}
-                      onClick={() => markAnswer(questionId, option)}
-                      style={
-                        response?.response === option
-                          ? { border: "2px solid purple" }
-                          : {}
-                      }
-                    >
-                      {option}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))} */}
         </div>
       </div>
     </PageLayout>
