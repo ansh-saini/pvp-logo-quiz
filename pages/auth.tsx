@@ -90,7 +90,7 @@ const Auth: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Login/Signup</title>
+        <title>{isSignUpMode ? "Signup" : "Login"}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
