@@ -28,7 +28,7 @@ const Home: NextPage = () => {
       const res = await postData("/api/createRoom", {
         owner: account.$id,
       });
-      router.push(`/roo m/${res.code}`);
+      router.push(`/room/${res.code}`);
     } catch (e) {
       console.error(e);
     }
