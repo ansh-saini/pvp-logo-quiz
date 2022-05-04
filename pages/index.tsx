@@ -2,7 +2,6 @@ import PageLayout from "components/PageLayout";
 import Button from "components/shared/Button";
 import Input from "components/shared/Input";
 import type { NextPage } from "next";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 import styles from "styles/Home.module.css";
@@ -74,12 +73,6 @@ const Home: NextPage = () => {
 
   return (
     <PageLayout classes={{ content: styles.pageLayoutContent }}>
-      <Head>
-        <title>PvP Logo Quiz</title>
-        <meta name="description" content="PvP Logo Quiz" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
       <div className={styles.sideButtons}>
         <Button dense onClick={toggleInstructions}>
           {showInstructions ? "Understood :)" : "How to play?"}
