@@ -4,7 +4,7 @@ import Input from "components/shared/Input";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "styles/Home.module.css";
 import { API, postData } from "utils/api";
 import { useInstructions } from "utils/hooks/useInstructions";
@@ -55,7 +55,7 @@ const Home: NextPage = () => {
     if (router.isReady) checkAuth();
   }, [router]);
 
-  const joinRoom = (e: HTMLFormElement) => {
+  const joinRoom = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (code) {
