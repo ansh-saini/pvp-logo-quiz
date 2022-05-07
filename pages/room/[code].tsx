@@ -51,7 +51,6 @@ const Room = () => {
     const responses = room[playerIndex];
 
     if (responses && Object.keys(responses).length === questions.length) {
-      console.log("Game Over");
       setGameOverForSelf(true);
     }
   }, [room, account]);
@@ -72,9 +71,19 @@ const Room = () => {
     const joinRoom = async (account: Account) => {
       if (!code || !account) return;
 
-      return postData(`/api/joinRoom/${code}`, {
-        userId: account.$id,
-      });
+      const jwt = localStorage.getItem(JWT_KEY);
+
+      return postData(
+        `/api/joinRoom/${code}`,
+        {
+          userId: account.$id,
+        },
+        jwt
+          ? {
+              jwt,
+            }
+          : undefined
+      );
     };
 
     const getAccount = () => {
@@ -104,6 +113,12 @@ const Room = () => {
 
           joinRoom(account)
             .then((res) => {
+              if (res.authExpired) {
+                generateAuth();
+                location.reload();
+                return;
+              }
+
               if (res.roomNotFound) {
                 setInvalidRoom(true);
                 return;

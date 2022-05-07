@@ -2,6 +2,7 @@ import { Collections } from "global/appwrite";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Query } from "node-appwrite";
 import { database } from "server/appwrite";
+import { getCurrentUser } from "server/utils";
 import { MAX_PLAYERS } from "utils/config";
 import { Room } from "utils/models";
 import { getInitialGameState } from "../createRoom";
@@ -16,10 +17,14 @@ export default async function handler(
 ) {
   return new Promise<void>(async (resolve) => {
     if (req.method === "POST") {
-      // TODO: Add authentication check here. We shouldn't be taking playerId in request.
+      const { user, error } = await getCurrentUser(req.headers);
+
+      if (!user || error) {
+        return res.status(401).json(error);
+      }
+      const playerId = user.$id;
 
       const { code } = req.query;
-      const { userId } = req.body;
 
       const { documents } = await database.listDocuments<Room>(
         Collections.Room,
@@ -34,7 +39,7 @@ export default async function handler(
       const roomId = room.$id;
 
       // Player had already joined once before.
-      if (room.players.includes(userId)) {
+      if (room.players.includes(playerId)) {
         resolve();
         return res.status(200).json({ joined: true });
       }
@@ -59,13 +64,13 @@ export default async function handler(
         Collections.Room,
         roomId,
         {
-          players: [...room.players, userId],
+          players: [...room.players, playerId],
           gameState: JSON.stringify(gameState),
           status: roomStatus,
           startTime: Date.now(),
         },
         // Give read access to the new player
-        [...room.$read, `user:${userId}`]
+        [...room.$read, `user:${playerId}`]
       );
 
       resolve();
