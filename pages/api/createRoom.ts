@@ -47,11 +47,7 @@ export default async function handler(
  * Duplicates are never produced.
  */
 export const getInitialGameState = async () => {
-  const { total, documents: logos } = await database.listDocuments<Logo>(
-    Collections.Logo,
-    undefined,
-    100
-  );
+  const logos = await getAllLogos();
 
   const getWrongOptions = (correctOption: string) => {
     const NUMBER_OF_OPTIONS = 3;
@@ -85,9 +81,10 @@ export const getInitialGameState = async () => {
   let count = 0;
   const NUMBER_OF_QUESTIONS = 10;
   const questions: Models.DocumentList<Question> = {
-    total: total,
+    total: logos.length,
     documents: [],
   };
+
   const generatedInts: number[] = [];
 
   while (questions.documents.length < NUMBER_OF_QUESTIONS) {
@@ -115,6 +112,31 @@ export const getInitialGameState = async () => {
   // console.log(`Returning with ${questions.documents.length} questions`);
 
   return formatQuestions(questions);
+};
+
+const getAllLogos = async () => {
+  let logos: Logo[] = [];
+
+  let res = await database.listDocuments<Logo>(
+    Collections.Logo,
+    undefined,
+    100
+  );
+
+  while (logos.length < res.total) {
+    logos = [...logos, ...res.documents];
+
+    res = await database.listDocuments<Logo>(
+      Collections.Logo,
+      undefined,
+      100,
+      logos.length
+    );
+
+    console.log(`Loaded ${logos.length} logos into memory`);
+  }
+
+  return logos;
 };
 
 /**
