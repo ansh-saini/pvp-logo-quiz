@@ -37,8 +37,9 @@ if (APPWRITE_ENDPOINT && APPWRITE_PROJECT && APPWRITE_SERVER_API_KEY) {
 }
 
 const getLogoFiles = () => {
-  const directoryPath = path.join(__dirname, "../../public/assets/logos");
-  return fs.readdirSync(directoryPath, function (err, files) {
+  const logoDirectory = path.join(__dirname, "../../public/assets/logos");
+
+  return fs.readdirSync(logoDirectory, function (err, files) {
     if (err) {
       return console.log("Unable to scan directory: " + err);
     }
@@ -70,19 +71,21 @@ const shouldCreate = (logo) => {
 
     for (const fileName of logoFiles) {
       const logo = fileName.split(".")[0];
+      const [name, category] = logo.split("__");
 
       if (await shouldCreate(logo)) {
         try {
           await database.createDocument(Collections.Logo, "unique()", {
-            name: logo,
+            name: name,
             image: encodeURI(IMG_PREFIX + fileName),
             difficulty: 0,
-            category: "Automobile",
+            category: category,
           });
-          console.log(`Created ${logo}`);
+          if (category) console.log(`Created ${name} (${category})`);
+          else console.log(`Created ${name}`);
           count += 1;
         } catch (e) {
-          console.error(`Failed to create ${logo}`, e);
+          console.error(`Failed to create ${name}`, e);
         }
       }
     }
