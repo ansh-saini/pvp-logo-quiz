@@ -11,6 +11,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import styles from "styles/Room.module.css";
 import { API, getData, postData } from "utils/api";
+import { JWT_KEY } from "utils/config";
 import { getPlayerIndex, parseRoomState } from "utils/helpers";
 import { Account, ParsedRoom, Players, Room as RoomType } from "utils/models";
 
@@ -27,8 +28,6 @@ const Room = () => {
   const router = useRouter();
   const { code } = router.query;
 
-  const [jwt, setJwt] = useState("");
-
   const [room, setRoom] = useState<ParsedRoom | null>(null);
   const [invalidRoom, setInvalidRoom] = useState<boolean>(false);
   const [gameOverForSelf, setGameOverForSelf] = useState<boolean>(false);
@@ -37,6 +36,12 @@ const Room = () => {
   const [account, setAccount] = useState<Account | null>(null);
 
   const [startTimer, setStartTimer] = useState(0);
+
+  const generateAuth = () =>
+    appwrite.account.createJWT().then((res) => {
+      localStorage.setItem(JWT_KEY, res.jwt);
+      return res.jwt;
+    });
 
   useEffect(() => {
     if (!room || !account) return;
@@ -119,10 +124,6 @@ const Room = () => {
           return;
         }
 
-        appwrite.account.createJWT().then((res) => {
-          setJwt(res.jwt);
-        });
-
         const parsedRoom = parseRoomState(room);
         setPlayers(await getPlayers(parsedRoom.code, parsedRoom));
         setRoom(parsedRoom);
@@ -145,6 +146,12 @@ const Room = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code, router]);
+
+  useEffect(() => {
+    if (!localStorage.getItem(JWT_KEY)) {
+      generateAuth();
+    }
+  }, []);
 
   const updatePlayers = async (room: ParsedRoom) => {
     setPlayers(await getPlayers(room.code, room));
@@ -277,19 +284,26 @@ const Room = () => {
                 return (
                   <>
                     <div className={styles.imgContainer}>
-                      <img src={question.image} alt="" width={80} height={80} />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={question.image}
+                        alt=""
+                        style={{
+                          maxWidth: 250,
+                          maxHeight: 250,
+                        }}
+                        width="auto"
+                        height="auto"
+                      />
                     </div>
                     <div className={styles.options}>
                       {question.options.map((option) => {
-                        const response = responses?.[questionId];
-
                         return (
                           <Option
-                            userToken={jwt}
+                            refreshAuth={generateAuth}
                             roomId={room.$id}
                             questionId={questionId}
                             option={option}
-                            isMarked={response?.response === option}
                             key={`${questionId}-${option}`}
                           />
                         );

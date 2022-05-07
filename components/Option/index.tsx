@@ -2,15 +2,14 @@ import React from "react";
 import { postData } from "utils/api";
 
 type Props = {
-  userToken: string;
   roomId: string;
   questionId: string;
   option: string;
-  isMarked: boolean;
+  refreshAuth: () => Promise<string>;
 };
 
-const Option = ({ userToken, roomId, questionId, option, isMarked }: Props) => {
-  const markAnswer = () => {
+const Option = ({ roomId, questionId, option, refreshAuth }: Props) => {
+  const markAnswer = (updatedJwt?: string) => {
     postData(
       "/api/saveResponse",
       {
@@ -19,20 +18,20 @@ const Option = ({ userToken, roomId, questionId, option, isMarked }: Props) => {
         response: option,
         timeStamp: Date.now(),
       },
-      {
-        jwt: userToken,
+      updatedJwt
+        ? {
+            jwt: updatedJwt,
+          }
+        : undefined
+    ).then((res) => {
+      if (res.authExpired) {
+        // Refresh auth and retry request
+        refreshAuth().then(markAnswer);
       }
-    );
+    });
   };
 
-  return (
-    <button
-      onClick={() => markAnswer()}
-      style={isMarked ? { border: "2px solid purple" } : {}}
-    >
-      {option}
-    </button>
-  );
+  return <button onClick={() => markAnswer()}>{option}</button>;
 };
 
 export default Option;

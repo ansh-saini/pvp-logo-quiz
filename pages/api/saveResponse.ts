@@ -42,16 +42,19 @@ export default async function handler(
         .setProject(APPWRITE_PROJECT || "")
         .setJWT(jwt);
 
-      const player = await account.get();
-
-      const playerId = player.$id;
-
-      if (!playerId) {
+      let player;
+      try {
+        player = await account.get();
+      } catch (e) {
         resolve();
         return res
           .status(401)
           .json({ authExpired: true, message: "Authentication expired" });
       }
+
+      if (!player) return;
+
+      const playerId = player.$id;
 
       const room = await database.getDocument<Room>(Collections.Room, roomId);
       const { name: correctAnswer } = await database.getDocument<Logo>(

@@ -1,15 +1,20 @@
 import { AppwriteException } from "appwrite";
 import { appwrite } from "global/appwrite";
+import { JWT_KEY } from "./config";
 
-export async function postData(url = "", data = {}, headers = {}) {
+export async function postData(url = "", data = {}, headers: HeadersInit = {}) {
+  const jwt = localStorage.getItem(JWT_KEY);
+
+  const reqHeaders: HeadersInit = {
+    "Content-Type": "application/json",
+    ...headers,
+    ...("jwt" in headers ? {} : jwt ? { jwt } : {}),
+  };
+
   // Default options are marked with *
   const response = await fetch(url, {
     method: "POST", // *GET, POST, PUT, DELETE, etc.
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-      // 'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers: reqHeaders,
     body: JSON.stringify(data), // body data type must match "Content-Type" header
   });
   return response.json(); // parses JSON response into native JavaScript objects
