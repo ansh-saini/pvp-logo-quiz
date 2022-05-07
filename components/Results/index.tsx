@@ -26,7 +26,7 @@ const Result = ({ room, playerNames }: Props) => {
     fetch(`/api/result/?roomId=${room.$id}`)
       .then((res) => res.json())
       .then((res) => setResult(res.data));
-  }, []);
+  }, [room.$id]);
 
   if (!result) return null;
 
