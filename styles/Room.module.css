@@ -3,11 +3,9 @@
 }
 
 .gameArea {
-  display: flex;
-  justify-content: space-evenly;
-}
-.gameArea div {
-  min-width: 400px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-content: center;
 }
 
 .question {
@@ -45,3 +43,18 @@
   font-size: 64px;
   color: var(--cat-red);
 }
+
+.pageLayoutContent {
+  min-width: 500px;
+  width: auto ;
+}
+
+@media (max-width: 500px) {
+  .hideOnMobile {
+    display: none;
+  }
+  .pageLayoutContent {
+    margin-top: 100px;
+  }
+}
+

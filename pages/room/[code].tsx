@@ -27,6 +27,8 @@ const Room = () => {
   const router = useRouter();
   const { code } = router.query;
 
+  const [jwt, setJwt] = useState("");
+
   const [room, setRoom] = useState<ParsedRoom | null>(null);
   const [invalidRoom, setInvalidRoom] = useState<boolean>(false);
   const [gameOverForSelf, setGameOverForSelf] = useState<boolean>(false);
@@ -91,6 +93,7 @@ const Room = () => {
           [Query.equal("code", code)]
         );
         const room = res.documents[0];
+
         if (!room) {
           console.error("Room not found");
 
@@ -115,6 +118,10 @@ const Room = () => {
             .catch(console.error);
           return;
         }
+
+        appwrite.account.createJWT().then((res) => {
+          setJwt(res.jwt);
+        });
 
         const parsedRoom = parseRoomState(room);
         setPlayers(await getPlayers(parsedRoom.code, parsedRoom));
@@ -245,7 +252,7 @@ const Room = () => {
   }
 
   return (
-    <PageLayout>
+    <PageLayout classes={{ content: styles.pageLayoutContent }}>
       <Head>
         <title>Room | {room.code}</title>
       </Head>
@@ -253,7 +260,7 @@ const Room = () => {
 
       <div className={styles.container}>
         <div className={styles.gameArea}>
-          <div>
+          <div className={styles.hideOnMobile}>
             <ClientScores
               playerNames={players}
               room={room}
@@ -278,7 +285,7 @@ const Room = () => {
 
                         return (
                           <Option
-                            userId={account.$id}
+                            userToken={jwt}
                             roomId={room.$id}
                             questionId={questionId}
                             option={option}
@@ -296,18 +303,20 @@ const Room = () => {
             <h3>Loading Question</h3>
           )}
 
-          {room.players
-            .filter((id) => id !== account.$id)
-            .map((playerId) => (
-              <div key={playerId}>
-                <ClientScores
-                  room={room}
-                  playerNames={players}
-                  playerId={playerId}
-                  currentQuestionId={currentQuestion[0]}
-                />
-              </div>
-            ))}
+          <div className={styles.hideOnMobile}>
+            {room.players
+              .filter((id) => id !== account.$id)
+              .map((playerId) => (
+                <div key={playerId}>
+                  <ClientScores
+                    room={room}
+                    playerNames={players}
+                    playerId={playerId}
+                    currentQuestionId={currentQuestion[0]}
+                  />
+                </div>
+              ))}
+          </div>
         </div>
       </div>
     </PageLayout>

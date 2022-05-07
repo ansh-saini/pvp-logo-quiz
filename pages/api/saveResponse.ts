@@ -1,5 +1,6 @@
 import { Collections } from "global/appwrite";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { Account, Client } from "node-appwrite";
 import { database } from "server/appwrite";
 import { parseRoomState, SafeKeys } from "utils/helpers";
 import { Logo, ResponseData, Room } from "utils/models";
@@ -22,10 +23,35 @@ export default async function handler(
 ) {
   return new Promise<void>(async (resolve) => {
     if (req.method === "POST") {
-      // TODO: Add authentication check here. We shouldn't be taking playerId in request.
+      const { jwt } = req.headers;
+      const { roomId, questionId, response, timeStamp, isSkipped } = req.body;
 
-      const { roomId, playerId, questionId, response, timeStamp, isSkipped } =
-        req.body;
+      if (!jwt || Array.isArray(jwt)) {
+        resolve();
+        return res.status(401).json({ message: "Authentication not provided" });
+      }
+
+      const { APPWRITE_ENDPOINT, APPWRITE_PROJECT } = process.env;
+
+      const client = new Client();
+
+      const account = new Account(client);
+
+      client
+        .setEndpoint(APPWRITE_ENDPOINT || "")
+        .setProject(APPWRITE_PROJECT || "")
+        .setJWT(jwt);
+
+      const player = await account.get();
+
+      const playerId = player.$id;
+
+      if (!playerId) {
+        resolve();
+        return res
+          .status(401)
+          .json({ authExpired: true, message: "Authentication expired" });
+      }
 
       const room = await database.getDocument<Room>(Collections.Room, roomId);
       const { name: correctAnswer } = await database.getDocument<Logo>(

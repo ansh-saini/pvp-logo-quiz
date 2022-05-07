@@ -1,12 +1,13 @@
 import { AppwriteException } from "appwrite";
 import { appwrite } from "global/appwrite";
 
-export async function postData(url = "", data = {}) {
+export async function postData(url = "", data = {}, headers = {}) {
   // Default options are marked with *
   const response = await fetch(url, {
     method: "POST", // *GET, POST, PUT, DELETE, etc.
     headers: {
       "Content-Type": "application/json",
+      ...headers,
       // 'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: JSON.stringify(data), // body data type must match "Content-Type" header
