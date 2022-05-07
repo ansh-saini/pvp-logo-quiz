@@ -59,3 +59,7 @@
     color: var(--cat-purple);
   }
 }
+
+.pageLayoutContent {
+  width: auto;
+}

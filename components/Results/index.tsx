@@ -31,7 +31,7 @@ const Result = ({ room, playerNames }: Props) => {
   if (!result) return null;
 
   return (
-    <PageLayout>
+    <PageLayout classes={{ content: styles.pageLayoutContent }}>
       <Head>
         <title>Results | {room.code}</title>
       </Head>
