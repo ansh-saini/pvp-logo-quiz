@@ -7,15 +7,14 @@
   max-width: 600px;
   width: 90vw;
   /* height: 100%; */
-  padding: 40px;
+  padding: 0px 40px 40px 40px;
 }
 
 .stats {
   display: flex;
   justify-content: space-between;
-}
-
-.stats {
+  flex-wrap: wrap;
+  gap: 24px;
   font-weight: bold;
 }
 
@@ -62,4 +61,11 @@
 
 .pageLayoutContent {
   width: auto;
+}
+
+.winnerHeading {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
 }

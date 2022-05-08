@@ -38,9 +38,12 @@ const Result = ({ room, playerNames }: Props) => {
       <div className={styles.container}>
         <div className={styles.card}>
           {winner && (
-            <h1 style={{ whiteSpace: "nowrap" }}>
+            <h1 className={styles.winnerHeading}>
               Winner is:{" "}
-              <span className={styles.rotateColorsAnimation}>
+              <span
+                style={{ whiteSpace: "nowrap" }}
+                className={styles.rotateColorsAnimation}
+              >
                 {playerNames[winner.player]}
               </span>
             </h1>
