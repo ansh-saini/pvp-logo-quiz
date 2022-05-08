@@ -4,7 +4,9 @@
   align-items: center;
 
   /* --step-color: #9179e0; */
-  --step-color: #ff99ff;
+  --step-color: #6734ff;
+  --pulse-start-color: #fff;
+  --pulse-end-color: #6734ff;
 }
 
 /* Component Styles - Steps */
@@ -45,13 +47,13 @@
 
 @keyframes pulse {
   0% {
-    background-color: #ffcc98;
+    background-color: var(--pulse-start-color);
   }
   /* 50% {
     background-color: black;
   } */
   100% {
-    background-color: red;
+    background-color: var(--pulse-end-color);
   }
 }
 
