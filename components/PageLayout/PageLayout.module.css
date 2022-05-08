@@ -1,7 +1,5 @@
 .container {
   /* padding: 24px; */
-  background: url("../../public/assets/bg.jpg") right;
-  background-size: auto;
   height: 100%;
 
   display: flex;

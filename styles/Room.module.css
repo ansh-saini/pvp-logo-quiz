@@ -46,7 +46,7 @@
 
 .pageLayoutContent {
   min-width: 500px;
-  width: auto ;
+  width: auto;
 }
 
 @media (max-width: 500px) {
@@ -55,6 +55,15 @@
   }
   .pageLayoutContent {
     margin-top: 100px;
+    min-width: auto;
+    width: 100%;
+  }
+
+  .imgContainer {
+    min-width: 100%;
+  }
+
+  .gameArea {
+    grid-template-columns: 1fr;
   }
 }
-

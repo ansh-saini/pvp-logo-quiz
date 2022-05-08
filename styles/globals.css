@@ -34,6 +34,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+body {
+  background: url("../public/assets/bg.jpg") right;
+  background-size: auto;
+}
+
 button,
 input {
   font-family: inherit;

@@ -204,7 +204,12 @@ const Room = () => {
     );
   }
 
-  if (!room || !account) return <h1>Loading</h1>;
+  if (!room || !account)
+    return (
+      <PageLayout>
+        <h1>Loading</h1>
+      </PageLayout>
+    );
 
   const playerIndex = getPlayerIndex(room, account.$id);
 
