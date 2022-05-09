@@ -10,9 +10,9 @@ const sdk = require("node-appwrite");
 console.log("Running setup script\n");
 
 const {
-  SCRIPT_TEST_APPWRITE_SERVER_API_KEY: APPWRITE_SERVER_API_KEY,
-  SCRIPT_TEST_APPWRITE_ENDPOINT: APPWRITE_ENDPOINT,
-  SCRIPT_TEST_APPWRITE_PROJECT: APPWRITE_PROJECT,
+  APPWRITE_SERVER_API_KEY: APPWRITE_SERVER_API_KEY,
+  APPWRITE_ENDPOINT: APPWRITE_ENDPOINT,
+  APPWRITE_PROJECT: APPWRITE_PROJECT,
 } = process.env;
 
 if (!APPWRITE_ENDPOINT || !APPWRITE_PROJECT || !APPWRITE_SERVER_API_KEY)
@@ -73,7 +73,7 @@ const initDatabase = async () => {
     const { $id } = await database.createCollection(
       "unique()",
       COLLECTION_NAME,
-      "document",
+      "collection",
       ["role:all"],
       []
     );
@@ -113,7 +113,7 @@ const initDatabase = async () => {
     const { $id } = await database.createCollection(
       "unique()",
       COLLECTION_NAME,
-      "collection",
+      "document",
       [],
       []
     );
