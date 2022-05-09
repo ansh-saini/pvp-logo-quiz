@@ -52,7 +52,7 @@ const isAttributeAvailable = async (collectionId, key) => {
   return available;
 };
 
-const initDatabse = async () => {
+const initDatabase = async () => {
   const { collections } = await database.listCollections();
 
   const createLogoCollection = async () => {
@@ -91,6 +91,8 @@ const initDatabse = async () => {
     // Wait for attribute to be available
     if (await isAttributeAvailable($id, "name"))
       database.createIndex($id, "name", "unique", ["name"], ["ASC"]);
+
+    return $id;
   };
 
   const createRoomCollection = async () => {
@@ -149,13 +151,29 @@ const initDatabse = async () => {
     // Wait for attribute to be available
     if (await isAttributeAvailable($id, "code"))
       database.createIndex($id, "code", "unique", ["code"], ["ASC"]);
+
+    return $id;
   };
 
-  await createLogoCollection();
-  await createRoomCollection();
+  const logoCollectionId = await createLogoCollection();
+  const roomCollectionId = await createRoomCollection();
 
   console.log("Database setup complete");
-};
-initDatabse();
+  console.log(
+    `\n**CREATED 2 COLLECTIONS. ADD THE FOLLOWING LINES IN YOUR .env FILE:**\nAPPWRITE_COLLECTION_LOGO=${logoCollectionId}\nAPPWRITE_COLLECTION_ROOM=${roomCollectionId}`
+  );
 
-(async () => {})();
+  return {
+    logoCollectionId,
+    roomCollectionId,
+  };
+};
+
+const hydrateDatabase = async () => {};
+
+(async () => {
+  await initDatabase();
+  await hydrateDatabase();
+
+  console.log("\n\nSETUP COMPLETE");
+})();
