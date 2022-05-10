@@ -36,5 +36,4 @@ yarn-error.log*
 *.tsbuildinfo
 
 private
-public/data/logos
-public/data/pvp-logo-quiz
+public/data/*

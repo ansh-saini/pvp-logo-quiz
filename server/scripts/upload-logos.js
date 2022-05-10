@@ -1,4 +1,5 @@
-// @ts-nocheck
+const CryptoJS = require("crypto-js");
+
 require("dotenv").config();
 const path = require("path");
 const fs = require("fs");
@@ -23,7 +24,9 @@ if (
 )
   throw new Error("Please make sure all appwrite env variables are set");
 
+// You can update this to your cdn path if you want to host logos else where
 const IMG_PREFIX = "http://localhost:3000/assets/logos/";
+
 const Collections = {
   Logo: APPWRITE_COLLECTION_LOGO,
 };
@@ -37,6 +40,7 @@ if (APPWRITE_ENDPOINT && APPWRITE_PROJECT && APPWRITE_SERVER_API_KEY) {
 }
 
 const getLogoFiles = () => {
+  // Path of logos folder
   const logoDirectory = path.join(__dirname, "../../public/assets/logos");
 
   return fs.readdirSync(logoDirectory, function (err, files) {
@@ -64,20 +68,34 @@ const shouldCreate = (logo) => {
   });
 };
 
+const hashFileName = (fileName) => {
+  const chunks = fileName.split(".");
+  const ext = chunks.pop();
+  const logo = chunks.join(".");
+
+  const hash = CryptoJS.SHA1(logo).toString();
+
+  return `${hash}.${ext}`;
+};
+
 (async function () {
   let count = 0;
   try {
     const logoFiles = getLogoFiles();
 
     for (const fileName of logoFiles) {
-      const logo = fileName.split(".")[0];
+      const chunks = fileName.split(".");
+      // File extension
+      chunks.pop();
+      const logo = chunks.join(".");
       const [name, category] = logo.split("__");
 
       if (await shouldCreate(logo)) {
         try {
           await database.createDocument(Collections.Logo, "unique()", {
             name: name,
-            image: encodeURI(IMG_PREFIX + fileName),
+            // Hash file name to prevent answer leak
+            image: encodeURI(IMG_PREFIX + hashFileName(fileName)),
             difficulty: 0,
             category: category,
           });
@@ -94,3 +112,33 @@ const shouldCreate = (logo) => {
   }
   console.log(`Created ${count} logos`);
 })();
+
+// Helper function which creates a copy of the logos folder with hashed filenames (Upload the generated folder to cdn)
+const generateHashedLogos = () => {
+  const logoDirectory = path.join(__dirname, "../../public/assets/logos");
+
+  let count = 0;
+  try {
+    const logoFiles = getLogoFiles();
+
+    for (const fileName of logoFiles) {
+      fs.copyFile(
+        path.join(logoDirectory, fileName),
+        path.join(
+          logoDirectory.replace("logos", "pvp-logo-quiz"),
+          hashFileName(fileName)
+        ),
+        (err) => {
+          console.log(`Error copying: ${fileName}`);
+          if (err) throw err;
+        }
+      );
+      count++;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  console.log(`Hashed ${count} logos`);
+};
+
+// generateHashedLogos();
