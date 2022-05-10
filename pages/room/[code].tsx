@@ -347,7 +347,13 @@ const Room = () => {
       <Head>
         <title>Room | {room.code}</title>
       </Head>
-      <TimeBar questionId={currentQuestion[0]} onEnd={onTimerEnd} />
+
+      {loading ? (
+        // To prevent layout shifting
+        <div style={{ height: 28 }}></div>
+      ) : (
+        <TimeBar questionId={questionId} onEnd={onTimerEnd} />
+      )}
 
       <div className={styles.container}>
         <div className={styles.gameArea}>
@@ -356,7 +362,7 @@ const Room = () => {
               playerNames={players}
               room={room}
               playerId={account.$id}
-              currentQuestionId={currentQuestion[0]}
+              currentQuestionId={questionId}
               isSelf
             />
           </div>
@@ -365,6 +371,37 @@ const Room = () => {
               {(() => {
                 const [questionId, question] = currentQuestion;
 
+                if (loading) {
+                  return (
+                    <>
+                      <div className={styles.imgContainer}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src="https://i.pinimg.com/originals/65/ba/48/65ba488626025cff82f091336fbf94bb.gif"
+                          alt=""
+                          style={{
+                            maxWidth: 250,
+                            maxHeight: 250,
+                          }}
+                          width="auto"
+                          height="auto"
+                        />
+                      </div>
+                      <div className={styles.options}>
+                        {question.options.map((option) => {
+                          return (
+                            <Option
+                              disabled={loading}
+                              markAnswer={markAnswer}
+                              option={"Loading"}
+                              key={`${questionId}-${option}`}
+                            />
+                          );
+                        })}
+                      </div>
+                    </>
+                  );
+                }
                 return (
                   <>
                     <div className={styles.imgContainer}>
