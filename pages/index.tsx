@@ -15,6 +15,7 @@ const Home: NextPage = () => {
   const [showTextField, setShowTextField] = useState(false);
   const { showInstructions, toggleInstructions } = useInstructions();
 
+  const [loading, setLoading] = useState(false);
   const [code, setCode] = useState("");
   const [account, setAccount] = useState<Account | null>(null);
 
@@ -22,6 +23,8 @@ const Home: NextPage = () => {
 
   const createRoom = async () => {
     if (!account) return;
+
+    setLoading(true);
 
     try {
       const res = await postData("/api/createRoom", {
@@ -31,6 +34,7 @@ const Home: NextPage = () => {
     } catch (e) {
       console.error(e);
     }
+    setLoading(false);
   };
 
   const logout = async () => {
@@ -102,7 +106,7 @@ const Home: NextPage = () => {
       ) : (
         <form className={styles.main} onSubmit={joinRoom}>
           <h1>Welcome {account?.name}!</h1>
-          <Button type="button" onClick={createRoom}>
+          <Button type="button" onClick={createRoom} loading={loading}>
             Create Room
           </Button>
 

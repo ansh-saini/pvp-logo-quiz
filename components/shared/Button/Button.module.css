@@ -13,6 +13,11 @@
   filter: brightness(0.85);
 }
 
+.root:disabled {
+  pointer-events: none;
+  color: inherit;
+}
+
 .root:active {
   transition-duration: 100ms;
   filter: brightness(0.75) !important;
@@ -25,7 +30,6 @@
   background-color: var(--cat-red);
   filter: brightness(0.85);
 }
-
 
 .Button-dense {
   border-width: 5px;

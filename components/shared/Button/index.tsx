@@ -5,11 +5,13 @@ import styles from "./Button.module.css";
 type Props = {
   children: React.ReactNode;
   dense?: boolean;
+  loading?: boolean;
   color?: "danger";
 } & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 const Button = ({
   dense = false,
+  loading = false,
   color,
   children,
   className,
@@ -21,9 +23,11 @@ const Button = ({
         [styles["Button-danger"]]: color === "danger",
         [styles["Button-dense"]]: dense,
       })}
+      disabled={loading}
       {...props}
     >
       {children}
+      {loading && <div className="loading-ring"></div>}
     </button>
   );
 };

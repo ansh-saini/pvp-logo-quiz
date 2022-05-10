@@ -1,5 +1,6 @@
 import { Query } from "appwrite";
 import ClientScores from "components/ClientScores";
+import Loading from "components/Loading";
 import Lobby from "components/Lobby";
 import Option from "components/Option";
 import PageLayout from "components/PageLayout";
@@ -8,7 +9,7 @@ import TimeBar from "components/TimeBar";
 import { appwrite, Collections } from "global/appwrite";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "styles/Room.module.css";
 import { API, getData, postData } from "utils/api";
 import { JWT_KEY } from "utils/config";
@@ -27,6 +28,8 @@ const getPlayers = async (code: string, room: ParsedRoom) => {
 const Room = () => {
   const router = useRouter();
   const { code } = router.query;
+
+  const imageRef = useRef<HTMLImageElement>(null);
 
   const [loading, setLoading] = useState(false);
 
@@ -214,12 +217,7 @@ const Room = () => {
     );
   }
 
-  if (!room || !account)
-    return (
-      <PageLayout>
-        <h1>Loading</h1>
-      </PageLayout>
-    );
+  if (!room || !account) return <Loading />;
 
   const playerIndex = getPlayerIndex(room, account.$id);
 
@@ -254,7 +252,7 @@ const Room = () => {
 
   if (startTimer) {
     return (
-      <PageLayout>
+      <Loading>
         <Head>
           <title>
             Starting in {startTimer}... | {room.code}
@@ -265,7 +263,7 @@ const Room = () => {
         <h1>
           Starting in <span className={styles.timer}>{startTimer}</span>
         </h1>
-      </PageLayout>
+      </Loading>
     );
   }
 
@@ -279,10 +277,10 @@ const Room = () => {
 
   if (gameOverForSelf) {
     return (
-      <PageLayout>
+      <Loading>
         <h1>Calculating Results</h1>
         <h1>Waiting for other players to finish the game</h1>
-      </PageLayout>
+      </Loading>
     );
   }
 
@@ -342,6 +340,20 @@ const Room = () => {
     markAnswer("", undefined, true);
   };
 
+  const retryLoadingImage = () => {
+    setLoading(true);
+    const el = imageRef.current;
+    if (el) {
+      const originalSrc = el.src;
+      el.src = "";
+      setTimeout(() => {
+        console.log("Re-setting img src");
+        el.src = originalSrc;
+        setLoading(false);
+      }, 100);
+    }
+  };
+
   return (
     <PageLayout classes={{ content: styles.pageLayoutContent }}>
       <Head>
@@ -393,7 +405,7 @@ const Room = () => {
                             <Option
                               disabled={loading}
                               markAnswer={markAnswer}
-                              option={"Loading"}
+                              option="Loading"
                               key={`${questionId}-${option}`}
                             />
                           );
@@ -407,6 +419,8 @@ const Room = () => {
                     <div className={styles.imgContainer}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
+                        ref={imageRef}
+                        onError={retryLoadingImage}
                         src={question.image}
                         alt=""
                         style={{

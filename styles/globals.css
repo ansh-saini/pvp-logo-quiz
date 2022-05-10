@@ -71,3 +71,41 @@ button {
 *:focus {
   outline: 5px solid white;
 }
+
+.loading-ring {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-left: 8px;
+  margin-bottom: 5px;
+}
+
+.loading-ring:after {
+  content: " ";
+  display: block;
+  width: 20px;
+  height: 20px;
+  /* margin: 8px; */
+  border-radius: 50%;
+  border: 6px solid #000;
+  border-color: #000 transparent #000 transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.large.loading-ring {
+  width: 40px;
+  height: 40px;
+}
+
+.large.loading-ring:after {
+  width: 40px;
+  height: 40px;
+}
