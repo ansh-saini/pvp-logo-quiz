@@ -3,9 +3,10 @@
  * Create .env file with three variables.
  * run yarn setup
  */
-
-require("dotenv").config();
+const path = require("path");
+const fs = require("fs");
 const sdk = require("node-appwrite");
+require("dotenv").config();
 
 console.log("Running setup script\n");
 
@@ -158,10 +159,7 @@ const initDatabase = async () => {
   const logoCollectionId = await createLogoCollection();
   const roomCollectionId = await createRoomCollection();
 
-  console.log("Database setup complete");
-  console.log(
-    `\n**CREATED 2 COLLECTIONS. ADD THE FOLLOWING LINES IN YOUR .env FILE:**\nAPPWRITE_COLLECTION_LOGO=${logoCollectionId}\nAPPWRITE_COLLECTION_ROOM=${roomCollectionId}`
-  );
+  console.log("DATABASE SETUP COMPLETE");
 
   return {
     logoCollectionId,
@@ -169,11 +167,76 @@ const initDatabase = async () => {
   };
 };
 
-const hydrateDatabase = async () => {};
+const hydrateDatabase = async (logoCollectionId) => {
+  const getLogoFiles = () => {
+    // Path of logos folder
+    const logoDirectory = path.join(__dirname, "../../public/assets/logos");
+
+    return fs.readdirSync(logoDirectory, function (err, files) {
+      if (err) {
+        return console.log("Unable to scan directory: " + err);
+      }
+      return files;
+    });
+  };
+  const shouldCreate = (logo) => {
+    return new Promise(async (resolve) => {
+      try {
+        const response = await database.listDocuments(logoCollectionId, [
+          sdk.Query.equal("name", logo),
+        ]);
+        if (response.total === 0) {
+          resolve(true);
+        }
+        resolve(false);
+      } catch (e) {
+        console.error(e);
+        resolve(false);
+      }
+    });
+  };
+
+  const IMG_PREFIX = "http://localhost:3000/assets/logos/";
+
+  let count = 0;
+  try {
+    const logoFiles = getLogoFiles();
+
+    for (const fileName of logoFiles) {
+      const chunks = fileName.split(".");
+      // File extension
+      chunks.pop();
+      const logo = chunks.join(".");
+      const [name, category] = logo.split("__");
+
+      if (await shouldCreate(logo)) {
+        try {
+          await database.createDocument(logoCollectionId, "unique()", {
+            name: name,
+            image: encodeURI(IMG_PREFIX + fileName),
+            difficulty: 0,
+            category: category,
+          });
+          if (category) console.log(`Created ${name} (${category})`);
+          else console.log(`Created ${name}`);
+          count += 1;
+        } catch (e) {
+          console.error(`Failed to create ${name}`, e);
+        }
+      }
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  console.log(`\n\nHYDRATION COMPLETE: Created ${count} documents`);
+};
 
 (async () => {
-  await initDatabase();
-  await hydrateDatabase();
+  const { logoCollectionId, roomCollectionId } = await initDatabase();
+  await hydrateDatabase(logoCollectionId);
 
   console.log("\n\nSETUP COMPLETE");
+  console.log(
+    `\n**CREATED 2 COLLECTIONS. ADD THE FOLLOWING LINES IN YOUR .env FILE:**\nAPPWRITE_COLLECTION_LOGO=${logoCollectionId}\nAPPWRITE_COLLECTION_ROOM=${roomCollectionId}`
+  );
 })();
