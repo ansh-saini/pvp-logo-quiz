@@ -1,6 +1,6 @@
 # PVP Logo Quiz
 
-![Cover](/public/Cover.png)
+![Cover](https://github.com/ansh-saini/pvp-logo-quiz/blob/main/public/Cover.png)
 
 ## Project setup guide
 
