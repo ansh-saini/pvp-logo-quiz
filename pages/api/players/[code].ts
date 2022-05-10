@@ -14,23 +14,27 @@ export default async function handler(
   return new Promise<void>(async (resolve) => {
     if (req.method === "GET") {
       const { code } = req.query;
-      const { documents } = await database.listDocuments<Room>(
-        Collections.Room,
-        [Query.equal("code", code)]
-      );
-      const room = documents[0];
 
-      const data: Record<string, string> = {};
-      // Mapping playerId with their name
-      for (const playerId of room.players) {
-        const { name, $id } = await users.get(playerId);
-        data[$id] = name;
+      try {
+        const { documents } = await database.listDocuments<Room>(
+          Collections.Room,
+          [Query.equal("code", code)]
+        );
+        const room = documents[0];
+
+        const data: Record<string, string> = {};
+        // Mapping playerId with their name
+        for (const playerId of room.players) {
+          const { name, $id } = await users.get(playerId);
+          data[$id] = name;
+        }
+
+        resolve();
+        return res.status(200).json({ data });
+      } catch (e) {
+        resolve();
+        return res.status(500).json({ error: "Something went wrong" });
       }
-
-      resolve();
-      return res.status(200).json({ data });
     }
-
-    resolve();
   });
 }

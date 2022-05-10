@@ -28,16 +28,28 @@ export default async function handler(
       const { user, error } = await getCurrentUser(req.headers);
 
       if (!user || error) {
+        resolve();
         return res.status(401).json(error);
       }
 
       const playerId = user.$id;
 
-      const room = await database.getDocument<Room>(Collections.Room, roomId);
-      const { name: correctAnswer } = await database.getDocument<Logo>(
-        Collections.Logo,
-        questionId
-      );
+      let room: Room;
+      let correctAnswer: string;
+      try {
+        room = await database.getDocument<Room>(Collections.Room, roomId);
+        const { name } = await database.getDocument<Logo>(
+          Collections.Logo,
+          questionId
+        );
+        correctAnswer = name;
+      } catch (e) {
+        console.error(e);
+        resolve();
+        return res.status(500).json(e);
+      }
+
+      if (!room || !correctAnswer) return;
 
       // p1, p2, p3 etc...
       const playerIndex = `p${room.players.indexOf(playerId) + 1}` as
@@ -91,7 +103,5 @@ export default async function handler(
         return res.status(400).json({ errors: e });
       }
     }
-
-    resolve();
   });
 }

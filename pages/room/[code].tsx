@@ -28,6 +28,8 @@ const Room = () => {
   const router = useRouter();
   const { code } = router.query;
 
+  const [loading, setLoading] = useState(false);
+
   const [room, setRoom] = useState<ParsedRoom | null>(null);
   const [invalidRoom, setInvalidRoom] = useState<boolean>(false);
   const [gameOverForSelf, setGameOverForSelf] = useState<boolean>(false);
@@ -114,8 +116,7 @@ const Room = () => {
           joinRoom(account)
             .then((res) => {
               if (res.authExpired) {
-                generateAuth();
-                location.reload();
+                generateAuth().then(() => location.reload());
                 return;
               }
 
@@ -190,6 +191,15 @@ const Room = () => {
           updatePlayers(parsedRoom);
         }
 
+        const playerData = parsedRoom[playerIndex];
+        if (playerData && prevState)
+          if (
+            Object.keys(playerData).length <
+            Object.keys(prevState[playerIndex] || {}).length
+          ) {
+            return { ...parsedRoom, [playerIndex]: prevState[playerIndex] };
+          }
+
         return parsedRoom;
       });
     });
@@ -220,16 +230,26 @@ const Room = () => {
     return !responses?.[questionId];
   });
 
-  const onTimerEnd = () => {
-    if (currentQuestion) {
-      postData("/api/saveResponse", {
-        roomId: room.$id,
-        playerId: account.$id,
-        questionId: currentQuestion[0],
-        isSkipped: true,
-        timeStamp: Date.now(),
-      });
-    }
+  const updateLocalState = (data: {
+    response: string;
+    questionId: string;
+    isCorrect: null;
+    timeStamp: number;
+    isSkipped: boolean;
+  }) => {
+    setRoom((prevState) => {
+      if (!currentQuestion || !prevState) return prevState;
+
+      return {
+        ...prevState,
+        [playerIndex]: {
+          ...prevState[playerIndex],
+          [data.questionId]: {
+            ...data,
+          },
+        },
+      };
+    });
   };
 
   if (startTimer) {
@@ -278,12 +298,56 @@ const Room = () => {
     );
   }
 
+  const [questionId] = currentQuestion;
+
+  const markAnswer = (
+    option: string,
+    updatedJwt?: string,
+    isSkipped = false
+  ) => {
+    const data = {
+      response: option,
+      questionId,
+      isCorrect: null,
+      timeStamp: Date.now(),
+      isSkipped,
+    };
+    updateLocalState(data);
+
+    setLoading(true);
+    postData(
+      "/api/saveResponse",
+      {
+        roomId: room.$id,
+        questionId: data.questionId,
+        response: data.response,
+        timeStamp: data.timeStamp,
+      },
+      updatedJwt
+        ? {
+            jwt: updatedJwt,
+          }
+        : undefined
+    ).then((res) => {
+      if (res.authExpired) {
+        // Refresh auth and retry request
+        generateAuth().then((jwt) => markAnswer(option, jwt));
+        return;
+      }
+      setLoading(false);
+    });
+  };
+
+  const onTimerEnd = () => {
+    markAnswer("", undefined, true);
+  };
+
   return (
     <PageLayout classes={{ content: styles.pageLayoutContent }}>
       <Head>
         <title>Room | {room.code}</title>
       </Head>
-      <TimeBar questionId={currentQuestion[0]} onEnd={() => {}} />
+      <TimeBar questionId={currentQuestion[0]} onEnd={onTimerEnd} />
 
       <div className={styles.container}>
         <div className={styles.gameArea}>
@@ -320,9 +384,8 @@ const Room = () => {
                       {question.options.map((option) => {
                         return (
                           <Option
-                            refreshAuth={generateAuth}
-                            roomId={room.$id}
-                            questionId={questionId}
+                            disabled={loading}
+                            markAnswer={markAnswer}
                             option={option}
                             key={`${questionId}-${option}`}
                           />

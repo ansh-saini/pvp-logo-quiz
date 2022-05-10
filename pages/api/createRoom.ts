@@ -31,12 +31,18 @@ export default async function handler(
           },
           [`user:${ownerId}`]
         )
-        .then((room) => {
-          res.status(200).json({ code: room.code });
-        });
+        .then(
+          (room) => {
+            resolve();
+            return res.status(200).json({ code: room.code });
+          },
+          (e) => {
+            console.error(e);
+            resolve();
+            return res.status(400).json({ error: e });
+          }
+        );
     }
-
-    return resolve();
   });
 }
 
@@ -123,15 +129,21 @@ const getAllLogos = async () => {
     100
   );
 
-  while (logos.length < res.total) {
+  let exception = false;
+
+  while (!exception && logos.length < res.total) {
     logos = [...logos, ...res.documents];
 
-    res = await database.listDocuments<Logo>(
-      Collections.Logo,
-      undefined,
-      100,
-      logos.length
-    );
+    try {
+      res = await database.listDocuments<Logo>(
+        Collections.Logo,
+        undefined,
+        100,
+        logos.length
+      );
+    } catch (e) {
+      exception = true;
+    }
 
     console.log(`Loaded ${logos.length} logos into memory`);
   }
