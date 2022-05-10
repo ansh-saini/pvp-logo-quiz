@@ -1,6 +1,6 @@
 # PVP Logo Quiz
 
-![Cover](public/Cover.png)
+![Cover](/public/Cover.png)
 
 ## Project setup guide
 
