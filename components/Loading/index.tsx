@@ -9,7 +9,12 @@ const Loading = ({ children = <h1>Loading</h1> }: Props) => {
     <PageLayout>
       <div className={styles.root}>
         {children}
-        <div className="large loading-ring"></div>
+        <div
+          className="large loading-ring"
+          style={{
+            margin: "auto",
+          }}
+        ></div>
       </div>
     </PageLayout>
   );
