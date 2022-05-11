@@ -9,20 +9,13 @@ const {
   APPWRITE_ENDPOINT,
   APPWRITE_PROJECT,
   APPWRITE_SERVER_API_KEY,
-  APPWRITE_COLLECTION_LOGO,
   APPWRITE_COLLECTION_ROOM,
 } = process.env;
 
-if (
-  !APPWRITE_ENDPOINT ||
-  !APPWRITE_PROJECT ||
-  !APPWRITE_SERVER_API_KEY ||
-  !APPWRITE_COLLECTION_LOGO
-)
+if (!APPWRITE_ENDPOINT || !APPWRITE_PROJECT || !APPWRITE_SERVER_API_KEY)
   throw new Error("Please make sure all appwrite env variables are set");
 
 const Collections = {
-  Logo: APPWRITE_COLLECTION_LOGO,
   Room: APPWRITE_COLLECTION_ROOM,
 };
 
@@ -35,15 +28,23 @@ if (APPWRITE_ENDPOINT && APPWRITE_PROJECT && APPWRITE_SERVER_API_KEY) {
 
 (async function () {
   let count = 0;
-  const { documents } = await database.listDocuments(Collections.Room);
+  let data = await database.listDocuments(Collections.Room, [], 100);
 
-  for (const d of documents) {
-    try {
-      await database.deleteDocument(Collections.Room, d.$id);
-      count += 1;
-    } catch (e) {
-      console.error(e);
+  while (data.total > 0) {
+    let { documents, total } = data;
+
+    console.log(`Documents left: ${total}`);
+    console.log(`Deleting Batch of: ${documents.length}`);
+    for (const d of documents) {
+      try {
+        await database.deleteDocument(Collections.Room, d.$id);
+        count += 1;
+      } catch (e) {
+        console.error(e);
+      }
     }
+
+    data = await database.listDocuments(Collections.Room, [], 100);
   }
-  console.log(`Deleted ${count} Rooms`);
+  console.log(`Deleted ${count} rooms`);
 })();
