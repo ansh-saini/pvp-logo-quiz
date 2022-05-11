@@ -1,8 +1,3 @@
-/**
- * USER:
- * Create .env file with three variables.
- * run yarn setup
- */
 const path = require("path");
 const fs = require("fs");
 const sdk = require("node-appwrite");
@@ -62,12 +57,13 @@ const initDatabase = async () => {
       ({ name }) => name === COLLECTION_NAME
     );
     if (exisingCollection) {
-      // throw new Error(
-      //   `${COLLECTION_NAME} collection already exists. Please delete it from the Appwrite dashboard before proceeding.`
-      // );
+      throw new Error(
+        `${COLLECTION_NAME} collection already exists. Please delete it from the Appwrite dashboard before proceeding.`
+      );
 
-      console.log(`Deleting existing collection: ${COLLECTION_NAME}`);
-      await database.deleteCollection(exisingCollection.$id);
+      // Use this while testing
+      // console.log(`Deleting existing collection: ${COLLECTION_NAME}`);
+      // await database.deleteCollection(exisingCollection.$id);
     }
 
     console.log(`Creating new collection: ${COLLECTION_NAME}`);
@@ -102,12 +98,13 @@ const initDatabase = async () => {
       ({ name }) => name === COLLECTION_NAME
     );
     if (exisingCollection) {
-      // throw new Error(
-      //   `${COLLECTION_NAME} collection already exists. Please delete it from the Appwrite dashboard before proceeding.`
-      // );
+      throw new Error(
+        `${COLLECTION_NAME} collection already exists. Please delete it from the Appwrite dashboard before proceeding.`
+      );
 
-      console.log(`Deleting existing collection: ${COLLECTION_NAME}`);
-      await database.deleteCollection(exisingCollection.$id);
+      // Use this while testing
+      // console.log(`Deleting existing collection: ${COLLECTION_NAME}`);
+      // await database.deleteCollection(exisingCollection.$id);
     }
 
     console.log(`Creating new collection: ${COLLECTION_NAME}`);
